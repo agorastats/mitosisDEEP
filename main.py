@@ -13,6 +13,5 @@ def print_hi(name):
 if __name__ == '__main__':
     print_hi('PyCharm')
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
 
 # aqui si que mola: https://github.com/CODAIT/deep-histopath/blob/master/preprocess_mitoses.py
