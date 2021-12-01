@@ -1,7 +1,7 @@
 import cv2
 from patchify import patchify
 import tifffile as tiff
-from utils.image import create_output_dir
+from utils.image import create_dir
 
 # link interessant: https://github.com/bnsreenu/python_for_microscopists/blob/643521e2ff152ed52369bd40391e226b8a71d481/222_working_with_large_data_that_does_not_fit_memory_semantic_segm/222_unet_loading_data_from_drive.py
 # unpatchify: https://github.com/bnsreenu/python_for_microscopists/blob/2c2b120fec17d8686572719916920bc05e3288f8/206_sem_segm_large_images_using_unet_with_patchify.py
@@ -11,9 +11,9 @@ from utils.image import create_output_dir
 if __name__ == '__main__':
     # ref: https://www.youtube.com/watch?v=7IL7LKSLb9I
     # ref github: https://github.com/bnsreenu/python_for_microscopists/blob/2c2b120fec17d8686572719916920bc05e3288f8/Tips_Tricks_5_extracting_patches_from_large_images_and_masks_for_semantic_segm.py
-    output_dir = 'sample_data/proves/prova2'
-    create_output_dir(output_dir + '/images/')
-    create_output_dir(output_dir + '/masks/')
+    output_dir = '../sample_data/proves/prova2'
+    create_dir(output_dir + '/images/')
+    create_dir(output_dir + '/masks/')
 
     large_image_stack = tiff.imread('sample_data/mitocondria/image.tif')
     large_mask_stack = tiff.imread('sample_data/mitocondria/mask.tif')

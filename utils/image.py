@@ -25,13 +25,14 @@ def img2np(img):
     return img.transpose(2, 1, 0)
 
 
-def read_image(filename):
+def read_and_normalize_image(filename, convert=None):
     assert os.path.exists(filename), 'Problems reading filename %s' % filename
     image = cv2.imread(filename)
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    if convert is not None:
+        image = cv2.cvtColor(image, convert)
     image = image_normalize(image)
-    return img2np(image)
-
+    # return img2np(image)
+    return image
 
 def np2img(np_array):
     np_array = np.asarray(np_array)
@@ -68,7 +69,7 @@ def load_annotations(path):
     return result
 
 
-def create_output_dir(output_dir):
+def create_dir(output_dir):
     if not path.exists(output_dir):
         makedirs(output_dir)
 
