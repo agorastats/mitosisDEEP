@@ -8,7 +8,7 @@ from patchify import patchify
 import tifffile as tiff
 
 from preprocessing.stainNorm_Reinhard import Normalizer
-from utils.reader import create_output_dir
+from utils.image import create_output_dir
 
 if __name__ == '__main__':
     # test with data: A00_v2

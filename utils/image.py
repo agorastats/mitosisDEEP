@@ -1,13 +1,14 @@
 import glob
 import os
-from os import makedirs, path
 import re
-
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
+from os import makedirs, path
 from PIL import Image
 
 MAX_SIZE = 255.
+
 
 def image_normalize(img):
     img = np.asarray(img, dtype=np.float64)
@@ -76,5 +77,26 @@ def create_mask_with_annotations(image, annotations_list):
     mask_image = np.zeros_like(image)
     for m in range(len(annotations_list)):
         mask_image = cv2.fillPoly(mask_image, pts=[np.array(annotations_list[m])], color=(225, 255, 255))
-        mask_image = cv2.GaussianBlur(mask_image, ksize=(0, 0), sigmaX=2, sigmaY=2)
+        mask_image = cv2.GaussianBlur(mask_image, ksize=(1, 1), sigmaX=0, sigmaY=0)
+    mask_image = cv2.cvtColor(mask_image, cv2.COLOR_BGR2GRAY)
     return mask_image
+
+
+def generate_patch(image, height, width, patch_size=256):
+    patch_center = np.array([height, width])
+    limit_image = image.shape
+    # center patch if possible, else contains patch that starts at border of image
+    patch_x = int(patch_center[0] - patch_size / 2.) if patch_center[0] > patch_size / 2. else 0
+    patch_y = int(patch_center[1] - patch_size / 2.) if patch_center[1] > patch_size / 2. else 0
+    # to ensure patch size
+    patch_x -= max(0, patch_x + patch_size - limit_image[0])
+    patch_y -= max(0, patch_y + patch_size - limit_image[1])
+    patch_image = image[patch_x:patch_x + patch_size, patch_y:patch_y + patch_size]
+    return patch_image
+
+
+def show_image(image):
+    plt.imshow(image)
+    plt.show()
+
+

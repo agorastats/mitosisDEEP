@@ -1,7 +1,7 @@
 import cv2
 from patchify import patchify
 import tifffile as tiff
-from utils.reader import create_output_dir
+from utils.image import create_output_dir
 
 # link interessant: https://github.com/bnsreenu/python_for_microscopists/blob/643521e2ff152ed52369bd40391e226b8a71d481/222_working_with_large_data_that_does_not_fit_memory_semantic_segm/222_unet_loading_data_from_drive.py
 # unpatchify: https://github.com/bnsreenu/python_for_microscopists/blob/2c2b120fec17d8686572719916920bc05e3288f8/206_sem_segm_large_images_using_unet_with_patchify.py
