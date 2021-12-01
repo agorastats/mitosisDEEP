@@ -1,6 +1,7 @@
 import logging
 import os
 import cv2
+import numpy as np
 import pandas as pd
 
 from utils.image import load_annotations, create_dir, create_mask_with_annotations, generate_patch, show_image
@@ -25,6 +26,7 @@ if __name__ == '__main__':
             image = cv2.imread(os.path.join(data_dir, img))
             annotations_list = load_annotations(os.path.join(data_dir, name_img + '.csv'))
             mask = create_mask_with_annotations(image, annotations_list)
+            assert len(np.unique(mask)) <= 2, 'more than 2 color pixels'
             # create patches
             for i, m in enumerate(annotations_list):
                 w, h = pd.DataFrame(m).mean(axis=0).round(0).astype(int)   # get centroid of mitosis

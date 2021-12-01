@@ -77,7 +77,7 @@ def create_dir(output_dir):
 def create_mask_with_annotations(image, annotations_list):
     mask_image = np.zeros_like(image)
     for m in range(len(annotations_list)):
-        mask_image = cv2.fillPoly(mask_image, pts=[np.array(annotations_list[m])], color=(225, 255, 255))
+        mask_image = cv2.fillPoly(mask_image, pts=[np.array(annotations_list[m])], color=(255, 255, 255))
         mask_image = cv2.GaussianBlur(mask_image, ksize=(1, 1), sigmaX=0, sigmaY=0)
     mask_image = cv2.cvtColor(mask_image, cv2.COLOR_BGR2GRAY)
     return mask_image
