@@ -19,7 +19,7 @@ if __name__ == '__main__':
     create_dir(masks_aug)
     images_list = [f for f in os.listdir(os.path.join(DATA_PATH, 'images')) if f.endswith('.jpg')]
     # stain_norm = stain_normalizer(REF_IMAGE)  # reinhard stain normalization
-    for i, img in enumerate(images_list[:1]):
+    for i, img in enumerate(images_list):
         logging.info('___create augmented patches for img: %s' % str(img))
         name_img = img.split('.')[0]
         image = cv2.imread(os.path.join(DATA_PATH, 'images', img))
