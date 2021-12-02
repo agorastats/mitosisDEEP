@@ -187,7 +187,7 @@ def shift_scale_rotate(img, shift_limit=0.2, scale_limit=0.1, rotate_limit=45, s
 
 def stain_normalizer(ref_image):
     stain_norm = Normalizer()
-    stain_norm.fit(ref_image)
+    stain_norm.fit(cv2.imread(ref_image))
     return stain_norm
 
 
