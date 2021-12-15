@@ -1,12 +1,18 @@
-from scipy.ndimage.filters import gaussian_filter
-from utils.preprocess import Normalizer
-
+import os
 import math
 import cv2
 import numpy as np
 
+from scipy.ndimage.filters import gaussian_filter
+from utils.preprocess import Normalizer
 
-REF_IMAGE = 'a'
+
+
+# probability of success functional, i.e, patch k has functional with prob = TRANSFORM_PROB_DICT[functional]
+TRANSFORM_PROB_DICT = {'stain_norm': 0.2, 'gaussian_noise': 0.5, 'rotate': 1,
+                       'blur': 0.3, 'shift_scale_rotate': 0.7, 'distorsion': 0.5, 'contrast_or_brightness': 0.2}
+# functional using on patches
+TRANSFORM_COLS = list(TRANSFORM_PROB_DICT.keys())
 
 def to_tuple(param, low=None):
     if isinstance(param, tuple):
@@ -132,7 +138,7 @@ def distorsion(img, distort_limit=(-0.05, 0.05), shift_limit=(-0.05, 0.05), seed
     return img
 
 
-def random_brightness(img, alpha=.2, seed=None):
+def random_brightness(img, alpha=.1, seed=None):
     if seed is None:
         random_state = np.random.RandomState(1234)
     else:
@@ -142,7 +148,7 @@ def random_brightness(img, alpha=.2, seed=None):
     return alpha * img
 
 
-def random_contrast(img, alpha=.2, seed=None):
+def random_contrast(img, alpha=.1, seed=None):
     if seed is None:
         random_state = np.random.RandomState(1234)
     else:
@@ -186,23 +192,27 @@ def shift_scale_rotate(img, shift_limit=0.2, scale_limit=0.1, rotate_limit=45, s
 
 
 def stain_normalizer(ref_image):
+    assert os.path.exists(ref_image), 'Problems reading filename %s' % ref_image
+    img = cv2.imread(ref_image)
     stain_norm = Normalizer()
-    stain_norm.fit(cv2.imread(ref_image))
+    stain_norm.fit(img)
     return stain_norm
-
 
 def aug_generator(image, mask, seed=None, stain_norm=None):
     if seed is None:
         random_state = np.random.RandomState(1234)
     else:
         random_state = np.random.RandomState(seed)
-    # preprocess
-    if stain_norm is not None:
-        image = stain_norm.transform(image)
 
     p = random_state.uniform(0, 1.)
+
+    # preprocess
+    if stain_norm is not None:
+        if p < TRANSFORM_PROB_DICT['stain_norm']:
+            image = stain_norm.transform(image)
+
     # noise
-    if p < 0.5:
+    if p < TRANSFORM_PROB_DICT['gaussian_noise']:
         image = gaussian_noise(image, seed=seed)
 
     # rotation
@@ -210,24 +220,24 @@ def aug_generator(image, mask, seed=None, stain_norm=None):
     mask = rotate(mask, seed=seed)
 
     # blur
-    if p < 0.3:
+    if p < TRANSFORM_PROB_DICT['blur']:
         image = blur(image, seed=seed)
 
     # transformation
     # shift scale
-    if p < 0.7:
+    if p < TRANSFORM_PROB_DICT['shift_scale_rotate']:
         image = shift_scale_rotate(image, seed=seed)
         mask = shift_scale_rotate(mask, seed=seed)
 
     # distorsion
-    if p < 0.5:
+    if p < TRANSFORM_PROB_DICT['distorsion']:
         f = np.random.choice([elastic_transform, distorsion], 1)[0]
         image = f(image, seed=seed)
         mask = f(mask, seed=seed)
 
     # contrast or brightness
-    if p < 0.4:
+    if p < TRANSFORM_PROB_DICT['contrast_or_brightness']:
         f = np.random.choice([random_brightness, random_contrast], 1)[0]
         image = f(image, seed=seed)
 
-    return image, mask
+    return image, mask, p
