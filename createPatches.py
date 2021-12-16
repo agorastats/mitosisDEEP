@@ -11,8 +11,8 @@ from utils.image import load_annotations, create_dir, create_mask_with_annotatio
 FOLDERS_NAME = ['A0%i_v2' % i for i in range(5)] + ['H0%i_v2' % i for i in range(5)]  # training folder images
 DATA_PATH = 'icpr12_data'  # path that contains inside it training folder images
 PATCH_SIZE = 256  # shape of symmetric patch: (patch_size, patch_size)
-IMAGES_FOLDER = 'images_2021_12_15'    # folder to save patches of images
-MASKS_FOLDER = 'masks_2021_12_15'     # folder to save patches of masks
+IMAGES_FOLDER = 'images_2021_12_16'    # folder to save patches of images
+MASKS_FOLDER = 'masks_2021_12_16'     # folder to save patches of masks
 
 if __name__ == '__main__':
     # create needed folders
@@ -29,7 +29,6 @@ if __name__ == '__main__':
             image = cv2.imread(os.path.join(data_dir, img))
             annotations_list = load_annotations(os.path.join(data_dir, name_img + '.csv'))
             mask = create_mask_with_annotations(image, annotations_list)
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             assert len(np.unique(mask)) <= 2, 'more than 2 color pixels'
             # create patches over annotations list
             for i, m in enumerate(annotations_list):

@@ -40,22 +40,29 @@ if __name__ == '__main__':
             print("Iterating patch number: %i / %i" % (i, len(images_list)))
         logging.info('___create augmented patches for img: %s' % str(img))
         name_img = img.split('.')[0]
+
         image = cv2.imread(os.path.join(DATA_PATH, INPUT_IMAGES_FOLDER, img))
-        assert img is not None, 'problems reading image %s' % str(img)
+        assert image is not None, 'problems reading image %s' % str(img)
+
         mask = cv2.imread(os.path.join(DATA_PATH, INPUT_MASKS_FOLDER, img))
         mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
         assert mask is not None, 'problems reading mask of image %s' % str(img)
+
+        # real patches
         cv2.imwrite(os.path.join(images_aug, name_img + '.jpg'), image)
         cv2.imwrite(os.path.join(masks_aug, name_img + '.jpg'), mask)
+
+        # augmented patches
         for j in range(AUG_VALUE):
             name_aug = name_img + '_' + str(j)
             aug_image, aug_mask, p = aug_generator(image, mask, seed=i+j, stain_norm=stain_norm)
             cv2.imwrite(os.path.join(images_aug, name_aug + '.jpg'), aug_image)
             cv2.imwrite(os.path.join(masks_aug, name_aug + '.jpg'), aug_mask)
             update_augmentations_on_image_info(info_aug_df_list, name_aug, p)
+
     # save augmentations notes
     aug_notes_df = pd.concat(info_aug_df_list, ignore_index=True)
-    aug_notes_df.to_csv('../images_aug_2021_12_15_notes.csv', sep=';', index=False)
+    aug_notes_df.to_csv('../' + OUT_IMAGES_FOLDER + '_notes.csv', sep=';', index=False)
 
 
 

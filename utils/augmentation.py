@@ -194,6 +194,7 @@ def shift_scale_rotate(img, shift_limit=0.2, scale_limit=0.1, rotate_limit=45, s
 def stain_normalizer(ref_image):
     assert os.path.exists(ref_image), 'Problems reading filename %s' % ref_image
     img = cv2.imread(ref_image)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     stain_norm = Normalizer()
     stain_norm.fit(img)
     return stain_norm
