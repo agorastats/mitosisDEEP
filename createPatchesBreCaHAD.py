@@ -5,14 +5,18 @@ import numpy as np
 import pandas as pd
 from patchify import patchify
 
-from utils.image import load_annotations, create_dir, create_mask_with_annotations, generate_patch, show_image
+from utils.image import load_icpr12_annotations, create_dir, create_mask_with_annotations_icpr12, generate_patch, \
+    show_image, \
+    load_brecahad_annotations, create_mask_with_annotations_brecahad
 
-# data images (training data set) from: http://ludo17.free.fr/mitos_2012/download.html
-FOLDERS_NAME = ['A0%i_v2' % i for i in range(5)] + ['H0%i_v2' % i for i in range(5)]  # training folder images
-DATA_PATH = 'icpr12_data'  # path that contains inside it training folder images
+# data images (training data set) from: BreCaHAD: A Dataset for Breast Cancer Histopathological Annotation and Diagnosis
+FOLDERS_NAME = ['images']  # training folder images
+DATA_PATH = 'data/BreCaHAD'  # path that contains inside it training folder images
+ANNOT_PATH = 'data/BreCaHAD/groundTruth'
 PATCH_SIZE = 256  # shape of symmetric patch: (patch_size, patch_size)
 IMAGES_FOLDER = 'images_2021_12_16'    # folder to save patches of images
 MASKS_FOLDER = 'masks_2021_12_16'     # folder to save patches of masks
+
 
 if __name__ == '__main__':
     # create needed folders
@@ -22,17 +26,19 @@ if __name__ == '__main__':
     create_dir(os.path.join(output_dir, MASKS_FOLDER))
     for folder in FOLDERS_NAME:
         data_dir = os.path.join(DATA_PATH, folder)
-        images_list = [f for f in os.listdir(data_dir) if f.endswith('.bmp')]
+        images_list = [f for f in os.listdir(data_dir) if f.endswith('.tif')]
         for j, img in enumerate(images_list):
+            if j % 100 == 0:
+                print("Iterating image number: %i / %i" % (j, len(images_list)))
             logging.info('___prepare patches for img: %s' % str(img))
             name_img = img.split('.')[0]
             image = cv2.imread(os.path.join(data_dir, img))
-            annotations_list = load_annotations(os.path.join(data_dir, name_img + '.csv'))
-            mask = create_mask_with_annotations(image, annotations_list)
+            annotations_list = load_brecahad_annotations(os.path.join(ANNOT_PATH, name_img + '.json'), image.shape)
+            mask = create_mask_with_annotations_brecahad(image, annotations_list)
             assert len(np.unique(mask)) <= 2, 'more than 2 color pixels'
             # create patches over annotations list
             for i, m in enumerate(annotations_list):
-                w, h = pd.DataFrame(m).mean(axis=0).round(0).astype(int)   # get centroid of mitosis
+                w, h = m
                 image_patch = generate_patch(image, h, w, patch_size=PATCH_SIZE)
                 mask_patch = generate_patch(mask, h, w, patch_size=PATCH_SIZE)
                 assert sum(list(image_patch.shape)[:2]) == 2*PATCH_SIZE,\

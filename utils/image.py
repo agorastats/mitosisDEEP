@@ -1,4 +1,5 @@
 import glob
+import json
 import os
 import re
 import cv2
@@ -51,7 +52,7 @@ def reduce_size_of_image_and_save_it(filename, outputDir):
     img.save(outputDir + filename, format='jpeg', quality=10, optimize=True)
 
 
-def load_annotations(path):
+def load_icpr12_annotations(path):
     assert re.compile(r'.*\.csv').match(path) is not None
     result = []
     ln = 0
@@ -68,16 +69,41 @@ def load_annotations(path):
             raise Warning("Line %d in %s has invalid value." % (ln, path))
     return result
 
+def load_brecahad_annotations(path, image_shape):
+    assert re.compile(r'.*\.json').match(path) is not None
+    try:
+        # opening JSON file
+        f = open(path)
+        data = json.load(f)
+        annot_dict_list = data.get('mitosis')
+        f.close()
+        annot_list = [list(annot_dict_list[k].values()) for k in range(len(annot_dict_list))]
+        # renormalize annotations based on image shape (are between [0,1])
+        for i, annot in enumerate(annot_list):
+            annot_list[i][0] = int(annot[0] * image_shape[1])
+            annot_list[i][1] = int(annot[1] * image_shape[0])
+    except:
+        raise Warning("problems reading annotations json")
+    return annot_list
+
 
 def create_dir(output_dir):
     if not path.exists(output_dir):
         makedirs(output_dir)
 
 
-def create_mask_with_annotations(image, annotations_list):
+def create_mask_with_annotations_icpr12(image, annotations_list):
     mask_image = np.zeros_like(image)
     for m in range(len(annotations_list)):
         mask_image = cv2.fillPoly(mask_image, pts=[np.array(annotations_list[m])], color=(255, 255, 255))
+        mask_image = cv2.GaussianBlur(mask_image, ksize=(1, 1), sigmaX=0, sigmaY=0)
+    mask_image = cv2.cvtColor(mask_image, cv2.COLOR_BGR2GRAY)
+    return mask_image
+
+def create_mask_with_annotations_brecahad(image, annotations_list):
+    mask_image = np.zeros_like(image)
+    for m in range(len(annotations_list)):
+        mask_image = cv2.circle(mask_image, np.array(annotations_list[m]), 10, color=(255, 255, 255), thickness=-1)
         mask_image = cv2.GaussianBlur(mask_image, ksize=(1, 1), sigmaX=0, sigmaY=0)
     mask_image = cv2.cvtColor(mask_image, cv2.COLOR_BGR2GRAY)
     return mask_image
