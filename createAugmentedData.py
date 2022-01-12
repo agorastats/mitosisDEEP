@@ -5,7 +5,7 @@ import cv2
 import pandas as pd
 
 from utils.augmentation import aug_generator, stain_normalizer, TRANSFORM_PROB_DICT, TRANSFORM_COLS
-from utils.image import create_dir, read_and_normalize_image
+from utils.image import create_dir
 
 # path that contains inside it two folders with patches: images, masks
 DATA_PATH = 'patches'
