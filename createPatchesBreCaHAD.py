@@ -2,25 +2,23 @@ import logging
 import os
 import cv2
 import numpy as np
-import pandas as pd
-from patchify import patchify
 
-from utils.image import load_icpr12_annotations, create_dir, create_mask_with_annotations_icpr12, generate_patch, \
-    show_image, \
-    load_brecahad_annotations, create_mask_with_annotations_brecahad
+from patchify import patchify
+from utils.image import create_dir, generate_patch, load_brecahad_annotations, create_mask_with_annotations_brecahad,\
+    show_image
 
 # data images (training data set) from: BreCaHAD: A Dataset for Breast Cancer Histopathological Annotation and Diagnosis
 FOLDERS_NAME = ['images']  # training folder images
 DATA_PATH = 'data/BreCaHAD'  # path that contains inside it training folder images
 ANNOT_PATH = 'data/BreCaHAD/groundTruth'
 PATCH_SIZE = 256  # shape of symmetric patch: (patch_size, patch_size)
-IMAGES_FOLDER = 'images_2021_12_16'    # folder to save patches of images
-MASKS_FOLDER = 'masks_2021_12_16'     # folder to save patches of masks
+IMAGES_FOLDER = 'images_2022_01_12'    # folder to save patches of images
+MASKS_FOLDER = 'masks_2022_01_12'     # folder to save patches of masks
 
 
 if __name__ == '__main__':
     # create needed folders
-    output_dir = os.path.join(DATA_PATH, 'patches')
+    output_dir = os.path.join('patches', 'breCaHAD')
     create_dir(output_dir)
     create_dir(os.path.join(output_dir, IMAGES_FOLDER))
     create_dir(os.path.join(output_dir, MASKS_FOLDER))

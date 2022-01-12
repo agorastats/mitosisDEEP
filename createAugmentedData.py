@@ -12,11 +12,10 @@ DATA_PATH = 'icpr12_data/patches'
 AUG_VALUE = 5
 REF_IMAGE = 'utils/ref_he.jpg'
 STAIN_NORM = True
-OUT_IMAGES_FOLDER = 'images_aug_2021_12_15'    # folder to save patches of images
-OUT_MASKS_FOLDER = 'masks_aug_2021_12_15'     # folder to save patches of masks
-INPUT_IMAGES_FOLDER = 'images_2021_12_15'             # folder inside DATA_PATH containing images patches
-INPUT_MASKS_FOLDER = 'masks_2021_12_15'               # folder inside DATA_PATH containing masks patches
-
+OUT_IMAGES_FOLDER = 'images_aug_2022_01_12'    # folder to save patches of images
+OUT_MASKS_FOLDER = 'masks_aug_2022_01_12'     # folder to save patches of masks
+INPUT_IMAGES_FOLDER = 'images_2022_01_12'             # folder inside DATA_PATH containing images patches
+INPUT_MASKS_FOLDER = 'masks_2022_01_12'               # folder inside DATA_PATH containing masks patches
 
 def update_augmentations_on_image_info(info_aug_df_list, name_aug, prob):
     aux_dict = {k: prob < TRANSFORM_PROB_DICT[k] for k in TRANSFORM_COLS}

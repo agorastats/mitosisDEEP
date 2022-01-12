@@ -11,12 +11,12 @@ from utils.image import load_icpr12_annotations, create_dir, create_mask_with_an
 FOLDERS_NAME = ['A0%i_v2' % i for i in range(5)] + ['H0%i_v2' % i for i in range(5)]  # training folder images
 DATA_PATH = 'data/icpr12'  # path that contains inside it training folder images
 PATCH_SIZE = 256  # shape of symmetric patch: (patch_size, patch_size)
-IMAGES_FOLDER = 'images_2021_12_16'    # folder to save patches of images
-MASKS_FOLDER = 'masks_2021_12_16'     # folder to save patches of masks
+IMAGES_FOLDER = 'images_2022_01_12'    # folder to save patches of images
+MASKS_FOLDER = 'masks_2022_01_12'     # folder to save patches of masks
 
 if __name__ == '__main__':
     # create needed folders
-    output_dir = os.path.join(DATA_PATH, 'patches')
+    output_dir = os.path.join('patches', 'icpr12')
     create_dir(output_dir)
     create_dir(os.path.join(output_dir, IMAGES_FOLDER))
     create_dir(os.path.join(output_dir, MASKS_FOLDER))
@@ -24,6 +24,8 @@ if __name__ == '__main__':
         data_dir = os.path.join(DATA_PATH, folder)
         images_list = [f for f in os.listdir(data_dir) if f.endswith('.bmp')]
         for j, img in enumerate(images_list):
+            if j % 100 == 0:
+                print("Iterating image number: %i / %i" % (j, len(images_list)))
             logging.info('___prepare patches for img: %s' % str(img))
             name_img = img.split('.')[0]
             image = cv2.imread(os.path.join(data_dir, img))
