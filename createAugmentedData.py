@@ -8,7 +8,7 @@ from utils.augmentation import aug_generator, stain_normalizer, TRANSFORM_PROB_D
 from utils.image import create_dir, read_and_normalize_image
 
 # path that contains inside it two folders with patches: images, masks
-DATA_PATH = 'icpr12_data/patches'
+DATA_PATH = 'patches'
 AUG_VALUE = 5
 REF_IMAGE = 'utils/ref_he.jpg'
 STAIN_NORM = True
