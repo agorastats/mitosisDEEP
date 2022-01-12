@@ -18,7 +18,7 @@ MASKS_FOLDER = 'masks_2022_01_12'     # folder to save patches of masks
 
 if __name__ == '__main__':
     # create needed folders
-    output_dir = os.path.join('patches', 'breCaHAD')
+    output_dir = os.path.join('patches')
     create_dir(output_dir)
     create_dir(os.path.join(output_dir, IMAGES_FOLDER))
     create_dir(os.path.join(output_dir, MASKS_FOLDER))
