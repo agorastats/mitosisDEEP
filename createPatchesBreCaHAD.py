@@ -37,8 +37,9 @@ if __name__ == '__main__':
             # create patches over annotations list
             for i, m in enumerate(annotations_list):
                 w, h = m
-                image_patch = generate_patch(image, h, w, patch_size=PATCH_SIZE)
-                mask_patch = generate_patch(mask, h, w, patch_size=PATCH_SIZE)
+                centered_at = np.random.uniform(1, 3, 2)   # to avoid centered patches
+                image_patch = generate_patch(image, h, w, centered_at, patch_size=PATCH_SIZE)
+                mask_patch = generate_patch(mask, h, w, centered_at, patch_size=PATCH_SIZE)
                 assert sum(list(image_patch.shape)[:2]) == 2*PATCH_SIZE,\
                     'Error in expected shape of patch. Check image %s' % str(name_img)
                 cv2.imwrite(os.path.join(output_dir, IMAGES_FOLDER, name_img + '_' + str(i) + '.jpg'), image_patch)

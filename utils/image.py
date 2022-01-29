@@ -26,6 +26,23 @@ def img2np(img):
     return img.transpose(2, 1, 0)
 
 
+def read_image(filename, size):
+    assert os.path.exists(filename), 'Problems reading filename %s' % filename
+    image = cv2.imread(filename)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # need to change to train in RGB format the patches
+    image = cv2.resize(image, (size, size))
+    return image
+
+
+def read_mask(filename, size):
+    assert os.path.exists(filename), 'Problems reading filename %s' % filename
+    image = cv2.imread(filename)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    image = cv2.resize(image, (size, size))
+    (thresh, black_white_image) = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY)
+    return black_white_image
+
+
 def read_and_normalize_image(filename, convert=None):
     assert os.path.exists(filename), 'Problems reading filename %s' % filename
     image = cv2.imread(filename)
@@ -34,6 +51,7 @@ def read_and_normalize_image(filename, convert=None):
     image = image_normalize(image)
     # return img2np(image)
     return image
+
 
 def np2img(np_array):
     np_array = np.asarray(np_array)
@@ -69,6 +87,7 @@ def load_icpr12_annotations(path):
             raise Warning("Line %d in %s has invalid value." % (ln, path))
     return result
 
+
 def load_brecahad_annotations(path, image_shape):
     assert re.compile(r'.*\.json').match(path) is not None
     try:
@@ -100,6 +119,7 @@ def create_mask_with_annotations_icpr12(image, annotations_list):
     mask_image = cv2.cvtColor(mask_image, cv2.COLOR_BGR2GRAY)
     return mask_image
 
+
 def create_mask_with_annotations_brecahad(image, annotations_list):
     mask_image = np.zeros_like(image)
     for m in range(len(annotations_list)):
@@ -109,12 +129,12 @@ def create_mask_with_annotations_brecahad(image, annotations_list):
     return mask_image
 
 
-def generate_patch(image, height, width, patch_size=256):
+def generate_patch(image, height, width, centered, patch_size=256):
     patch_center = np.array([height, width])
     limit_image = image.shape
     # center patch if possible, else contains patch that starts at border of image
-    patch_x = int(patch_center[0] - patch_size / 2.) if patch_center[0] > patch_size / 2. else 0
-    patch_y = int(patch_center[1] - patch_size / 2.) if patch_center[1] > patch_size / 2. else 0
+    patch_x = int(patch_center[0] - patch_size / centered[0]) if patch_center[0] > patch_size / 2. else 0
+    patch_y = int(patch_center[1] - patch_size / centered[1]) if patch_center[1] > patch_size / 2. else 0
     # to ensure patch size
     patch_x -= max(0, patch_x + patch_size - limit_image[0])
     patch_y -= max(0, patch_y + patch_size - limit_image[1])
@@ -122,8 +142,11 @@ def generate_patch(image, height, width, patch_size=256):
     return patch_image
 
 
-def show_image(image):
-    plt.imshow(image)
+def show_image(*args):
+    if len(args) == 1:
+        plt.imshow(args[0])
+    else:
+        f, ax = plt.subplots(1, len(args), figsize=(8, 8))
+        for i, arg in enumerate(args):
+            ax[i].imshow(arg)
     plt.show()
-
-

@@ -51,7 +51,6 @@ def elastic_transform(image, alpha=1, sigma=30, alpha_affine=3, seed=None):
          Convolutional Neural Networks applied to Visual Document Analysis", in
          Proc. of the International Conference on Document Analysis and
          Recognition, 2003.
-     Based on https://gist.github.com/erniejunior/601cdf56d2b424757de5
     """
     if seed is None:
         random_state = np.random.RandomState(1234)
@@ -241,3 +240,28 @@ def aug_generator(image, mask, seed=None, stain_norm=None):
         image = f(image, seed=seed)
 
     return image, mask, p
+
+
+from albumentations import (
+    Compose, HorizontalFlip, CLAHE, HueSaturationValue,
+    RandomBrightness, RandomContrast, RandomGamma, OneOf,
+    ToFloat, ShiftScaleRotate, GridDistortion, ElasticTransform, JpegCompression, HueSaturationValue,
+    RGBShift, RandomBrightness, RandomContrast, Blur, MotionBlur, MedianBlur, GaussNoise, CenterCrop,
+    IAAAdditiveGaussianNoise, GaussNoise, OpticalDistortion, RandomSizedCrop
+)
+
+# possible errors, fix cv2: https://exerror.com/importerror-cannot-import-name-_registermattype-from-cv2-cv2/
+# To Solve ImportError: cannot import name '_registerMatType' from 'cv2.cv2' Error You just have to Downgrade opencv-python-headless to the 4.1.2.30 Because of opencv-python(4.1.2.30) does not match opencv-python-headless latest version and thats why this error occurs. So first of all Just uninstall opencv-python-headless with this command: pip uninstall opencv-python-headless and now, install opencv-python-headless==4.1.2.30 with this command: pip install opencv-python-headless==4.1.2.30 Now, Your error must be solved.
+
+AUGMENTATIONS_PIPELINE = Compose([
+    HorizontalFlip(p=0.5),
+    GaussNoise(var_limit=0.02, p=0.1),
+    Blur(blur_limit=4, p=0.3),
+    OneOf([RandomContrast(limit=.1), RandomBrightness(limit=0.1)], p=0.3),
+    ShiftScaleRotate(shift_limit=0.2, scale_limit=0.1, p=0.1),
+    OneOf([
+        ElasticTransform(alpha=100, sigma=6, alpha_affine=3),
+        GridDistortion(distort_limit=0.15),
+        OpticalDistortion(distort_limit=1, shift_limit=0.1)
+        ], p=0.3)
+], p=1)

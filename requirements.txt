@@ -1,0 +1,14 @@
+# ~=
+# It means it will select the latest version of the package, for ex: greater than or equal to 0.6.10, but still in the 0.6.* version,
+# so it won't download 0.7.0 for example.
+
+opencv-python~=4.5.3.56
+tifffile~=2020.9.3
+patchify~=0.2.2
+numpy~=1.19.5
+Pillow~=8.3.2
+scipy~=1.5.4
+albumentations~=1.1.0
+pandas~=1.1.5
+tensorflow~=2.6.0
+opencv-python.headless~=4.1.2.30
