@@ -3,18 +3,24 @@ import os
 import cv2
 import numpy as np
 import pandas as pd
-from patchify import patchify
 
+from patchify import patchify
 from utils.image import load_icpr12_annotations, create_dir, create_mask_with_annotations_icpr12, generate_patch, show_image
 
 # data images (training data set) from: http://ludo17.free.fr/mitos_2012/download.html
+from utils.options import ResolveOptions
+
 FOLDERS_NAME = ['A0%i_v2' % i for i in range(5)] + ['H0%i_v2' % i for i in range(5)]  # training folder images
 DATA_PATH = 'data/icpr12'  # path that contains inside it training folder images
 PATCH_SIZE = 256  # shape of symmetric patch: (patch_size, patch_size)
-IMAGES_FOLDER = 'images_2022_01_12'    # folder to save patches of images
-MASKS_FOLDER = 'masks_2022_01_12'     # folder to save patches of masks
+IMAGES_FOLDER = 'images_2022_01_30'    # folder to save patches of images
+MASKS_FOLDER = 'masks_2022_01_30'     # folder to save patches of masks
 
 if __name__ == '__main__':
+    opts = ResolveOptions()
+    options = opts.get_options()
+    IMAGES_FOLDER = options['images_folder']
+    MASKS_FOLDER = options['masks_folder']
     # create needed folders
     output_dir = os.path.join('patches')
     create_dir(output_dir)

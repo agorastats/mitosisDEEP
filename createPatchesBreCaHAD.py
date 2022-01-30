@@ -12,8 +12,8 @@ FOLDERS_NAME = ['images']  # training folder images
 DATA_PATH = 'data/BreCaHAD'  # path that contains inside it training folder images
 ANNOT_PATH = 'data/BreCaHAD/groundTruth'
 PATCH_SIZE = 256  # shape of symmetric patch: (patch_size, patch_size)
-IMAGES_FOLDER = 'images_2022_01_12'    # folder to save patches of images
-MASKS_FOLDER = 'masks_2022_01_12'     # folder to save patches of masks
+IMAGES_FOLDER = 'images_2022_01_30'    # folder to save patches of images
+MASKS_FOLDER = 'masks_2022_01_30'     # folder to save patches of masks
 
 
 if __name__ == '__main__':
