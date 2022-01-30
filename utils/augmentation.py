@@ -256,12 +256,12 @@ from albumentations import (
 AUGMENTATIONS_PIPELINE = Compose([
     HorizontalFlip(p=0.5),
     GaussNoise(var_limit=0.02, p=0.1),
-    Blur(blur_limit=4, p=0.3),
-    OneOf([RandomContrast(limit=.1), RandomBrightness(limit=0.1)], p=0.3),
-    ShiftScaleRotate(shift_limit=0.2, scale_limit=0.1, p=0.1),
+    Blur(blur_limit=3, p=0.1),
+    OneOf([RandomContrast(limit=0.1), RandomBrightness(limit=0.1)], p=0.3),
+    # ShiftScaleRotate(shift_limit=0.2, scale_limit=0.1, p=0.1),
     OneOf([
         ElasticTransform(alpha=100, sigma=6, alpha_affine=3),
         GridDistortion(distort_limit=0.15),
-        OpticalDistortion(distort_limit=1, shift_limit=0.1)
+        OpticalDistortion(distort_limit=1, shift_limit=0.2)
         ], p=0.3)
 ], p=1)
