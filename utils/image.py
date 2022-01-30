@@ -150,3 +150,17 @@ def show_image(*args):
         for i, arg in enumerate(args):
             ax[i].imshow(arg)
     plt.show()
+
+
+def show_images_of_generator_item(images, masks):
+    grid_width = 4
+    grid_height = int(len(images) / grid_width)
+    fig, axs = plt.subplots(grid_height, grid_width, figsize=(grid_width, grid_height))
+
+    for i, (im, mask) in enumerate(zip(images, masks)):
+        ax = axs[int(i / grid_width), i % grid_width]
+        ax.imshow(im, cmap='bone')
+        ax.imshow(mask.squeeze(), alpha=0.5, cmap="Reds")
+        ax.axis('off')
+    plt.suptitle("Scanner images | Red: Mitosis mask")
+    plt.show()
