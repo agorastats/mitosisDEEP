@@ -247,7 +247,7 @@ from albumentations import (
     RandomBrightness, RandomContrast, RandomGamma, OneOf,
     ToFloat, ShiftScaleRotate, GridDistortion, ElasticTransform, JpegCompression, HueSaturationValue,
     RGBShift, RandomBrightness, RandomContrast, Blur, MotionBlur, MedianBlur, GaussNoise, CenterCrop,
-    IAAAdditiveGaussianNoise, GaussNoise, OpticalDistortion, RandomSizedCrop
+    IAAAdditiveGaussianNoise, GaussNoise, OpticalDistortion, RandomSizedCrop, VerticalFlip
 )
 
 # possible errors, fix cv2: https://exerror.com/importerror-cannot-import-name-_registermattype-from-cv2-cv2/
@@ -255,8 +255,9 @@ from albumentations import (
 
 AUGMENTATIONS_PIPELINE = Compose([
     HorizontalFlip(p=0.5),
-    GaussNoise(var_limit=0.02, p=0.1),
-    Blur(blur_limit=3, p=0.1),
+    VerticalFlip(p=0.5),
+    GaussNoise(var_limit=0.02, p=0.2),
+    Blur(blur_limit=3, p=0.2),
     OneOf([RandomContrast(limit=0.1), RandomBrightness(limit=0.1)], p=0.3),
     # ShiftScaleRotate(shift_limit=0.2, scale_limit=0.1, p=0.1),
     OneOf([
