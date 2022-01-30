@@ -1,5 +1,5 @@
 # ~=
-# It means it will select the latest version of the package, for ex: greater than or equal to 0.6.10, but still in the 0.6.* version,
+# It means it will select the latest version of the package, for example: greater than or equal to 0.6.10, but still in the 0.6.* version,
 # so it won't download 0.7.0 for example.
 
 opencv-python~=4.5.3.56
