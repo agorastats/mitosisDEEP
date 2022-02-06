@@ -27,7 +27,7 @@ def img2np(img):
 def read_image(filename, size):
     assert os.path.exists(filename), 'Problems reading filename %s' % filename
     image = cv2.imread(filename)
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # need to change to train in RGB format the patches
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # need to change to train in RGB format the nets
     image = cv2.resize(image, (size, size))
     return image
 
