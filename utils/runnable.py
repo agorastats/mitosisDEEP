@@ -34,6 +34,11 @@ class Main(object):
     def __init__(self, executable):
         self._executable = executable
         self._options = None
+        self.calling_logging()
+
+    @staticmethod
+    def calling_logging():
+        logging.getLogger().setLevel(logging.INFO)
 
     def _add_options(self, parser):
         self._executable.add_options(parser)

@@ -61,7 +61,7 @@ class CreatePatchesBreCaHad(CreatePatches):
             data_dir = os.path.join(self.data_path, folder)
             annot_dir = os.path.join(self.annot_path)
             images_list = [f for f in os.listdir(data_dir) if f.endswith(self.img_format)]
-            for j, img in enumerate(images_list):
+            for j, img in enumerate(sorted(images_list)):
                 if j % 100 == 0:
                     logging.info('Iterating image number: %i / %i' % (j, len(images_list)))
                 logging.info('___prepare patches for img: %s' % str(img))

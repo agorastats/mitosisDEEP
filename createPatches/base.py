@@ -84,12 +84,13 @@ class CreatePatches(Runnable, metaclass=ABCMeta):
 
     def pre_run(self, options):
         self.create_needed_folders(options)
+        logging.info('iterating process: %s' % self.__class__.__name__)
 
     def run(self, options):
         pass
 
     def post_run(self, options):
-        # update patches info into df
+        logging.info('__update patches information: infoDF.csv')
         images_list = [f for f in os.listdir(self.img_output) if f.endswith('.jpg')]
         infoDF = pd.DataFrame(columns=['id'])
         infoDF.loc[:, 'id'] = images_list
