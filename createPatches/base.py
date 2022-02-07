@@ -26,7 +26,6 @@ class CreatePatches(Runnable, metaclass=ABCMeta):
         self.df_info_output = None
         self.folders_name = None
         self.img_format = None
-        self.patch_mitosis_count = dict()
         self.patchify = True
         self.seed_count = 1
 
@@ -57,11 +56,10 @@ class CreatePatches(Runnable, metaclass=ABCMeta):
         patch_image = image[patch_x:patch_x + patch_size, patch_y:patch_y + patch_size]
         return patch_image
 
-    def write_patches_and_update_mitosis_count(self, img_patch, mask_patch, name_img, number_patch, mitosis_count):
+    def write_patches(self, img_patch, mask_patch, name_img, number_patch, mitosis_count):
         name_img += '_' + str(number_patch) + '.jpg'
         cv2.imwrite(os.path.join(self.img_output, name_img), img_patch)
         cv2.imwrite(os.path.join(self.mask_output, name_img), mask_patch)
-        self.add_patch_mitosis_count(name_img, mitosis_count)
         self.seed_count += 1
 
     def create_patches_with_patchify(self, image, mask, name_img, patch_size=256, n_patches=2):
@@ -97,8 +95,6 @@ class CreatePatches(Runnable, metaclass=ABCMeta):
     def run(self, options):
         pass
 
-    def add_patch_mitosis_count(self, img_file, mitosis_count):
-        self.patch_mitosis_count[img_file] = mitosis_count
 
     def post_run(self, options):
         logging.info('__update patches information: infoDF.csv')
@@ -106,7 +102,6 @@ class CreatePatches(Runnable, metaclass=ABCMeta):
         infoDF = pd.DataFrame(columns=['id'])
         infoDF.loc[:, 'id'] = images_list
         infoDF.loc[:, 'images_from'] = self.data_path
-        infoDF.loc[:, 'mitosis_count'] = infoDF.loc[:, 'id'].map(self.patch_mitosis_count)
         infoDF.loc[:, 'insertionAt'] = pd.Series(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), index=infoDF.index)
 
         store_data_frame(infoDF, os.path.join(self.df_info_output, 'infoDF.csv'), mode='a')

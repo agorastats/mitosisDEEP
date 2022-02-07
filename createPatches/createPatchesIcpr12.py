@@ -48,7 +48,7 @@ class CreatePatchesIcpr12(CreatePatches):
             mask_patch = self.generate_patch(mask, h, w, centered_at, patch_size=patch_size)
             assert sum(list(image_patch.shape)[:2]) == 2 * patch_size, \
                 'Error in expected shape of patch. Check image %s' % str(name_img)
-            self.write_patches_and_update_mitosis_count(image_patch, mask_patch, name_img, i, len(annotations_list))
+            self.write_patches(image_patch, mask_patch, name_img, i, len(annotations_list))
 
     def run(self, options):
         for folder in self.folders_name:
