@@ -50,7 +50,7 @@ class CreatePatchesBreCaHad(CreatePatches):
             assert sum(list(image_patch.shape)[:2]) == 2 * patch_size, \
                 'Error in expected shape of patch. Check image %s' % str(name_img)
 
-            self.write_patches(image_patch, mask_patch, name_img, i, len(annotations_list))
+            self.write_patches(image_patch, mask_patch, name_img, i)
 
     def run(self, options):
         for folder in self.folders_name:
