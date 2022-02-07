@@ -1,7 +1,6 @@
 import json
 import logging
 import os
-import re
 import cv2
 import numpy as np
 
@@ -25,7 +24,6 @@ class CreatePatchesBreCaHad(CreatePatches):
         self.img_format = '.tif'
 
     def get_annotations(self, path, image_shape):
-        assert re.compile(r'.*\.json').match(path) is not None
         try:
             # opening JSON file
             f = open(path)
@@ -51,9 +49,8 @@ class CreatePatchesBreCaHad(CreatePatches):
             mask_patch = self.generate_patch(mask, h, w, centered_at, patch_size=patch_size)
             assert sum(list(image_patch.shape)[:2]) == 2 * patch_size, \
                 'Error in expected shape of patch. Check image %s' % str(name_img)
-            cv2.imwrite(os.path.join(self.img_output, name_img + '_' + str(i) + '.jpg'), image_patch)
-            cv2.imwrite(os.path.join(self.mask_output, name_img + '_' + str(i) + '.jpg'), mask_patch)
-            self.seed_count += 1
+
+            self.write_patches_and_update_mitosis_count(image_patch, mask_patch, name_img, i, len(annotations_list))
 
     def run(self, options):
         for folder in self.folders_name:
@@ -63,7 +60,7 @@ class CreatePatchesBreCaHad(CreatePatches):
             images_list = [f for f in os.listdir(data_dir) if f.endswith(self.img_format)]
             for j, img in enumerate(sorted(images_list)):
                 if j % 100 == 0:
-                    logging.info('Iterating image number: %i / %i' % (j, len(images_list)))
+                    logging.info('(progress) Iterating image number: %i / %i' % (j, len(images_list)))
                 logging.info('___prepare patches for img: %s' % str(img))
                 name_img = img.split('.')[0]
                 image = cv2.imread(os.path.join(data_dir, img))

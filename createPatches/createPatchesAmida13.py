@@ -1,7 +1,5 @@
-import json
 import logging
 import os
-import re
 import cv2
 import numpy as np
 
@@ -26,7 +24,6 @@ class CreatePatchesAmida13(CreatePatches):
         self.img_format = '.tif'
 
     def get_annotations(self, path):
-        assert re.compile(r'.*\.csv').match(path) is not None
         result = []
         ln = 0
         for line in open(path).readlines():
@@ -36,7 +33,7 @@ class CreatePatchesAmida13(CreatePatches):
                 continue
             # Parse line into list of numbers
             points = list(map(lambda x: x, line.strip().split(',')))
-            points = [int(p) for p in points]
+            points = [int(p) for p in points][::-1]   # reverse it, interpret as rows (width), columns (height)
             try:
                 result.append(points)
             except:
@@ -53,9 +50,7 @@ class CreatePatchesAmida13(CreatePatches):
             mask_patch = self.generate_patch(mask, h, w, centered_at, patch_size=patch_size)
             assert sum(list(image_patch.shape)[:2]) == 2 * patch_size, \
                 'Error in expected shape of patch. Check image %s' % str(name_img)
-            cv2.imwrite(os.path.join(self.img_output, name_img + '_' + str(i) + '.jpg'), image_patch)
-            cv2.imwrite(os.path.join(self.mask_output, name_img + '_' + str(i) + '.jpg'), mask_patch)
-            self.seed_count += 1
+            self.write_patches_and_update_mitosis_count(image_patch, mask_patch, name_img, i, len(annotations_list))
 
     def run(self, options):
         for folder in self.folders_name:
@@ -64,16 +59,19 @@ class CreatePatchesAmida13(CreatePatches):
             annot_dir = os.path.join(self.annot_path)
             # image regions in folder
             regions_list = [f for f in os.listdir(data_dir)]
-            for region in sorted(regions_list):
-                logging.info('Iterating region folder:  %s' % str(region))
+            for r, region in enumerate(sorted(regions_list)):
+                logging.info('Iterating region folder:  %i / %i' % (r, len(regions_list)))
                 region_dir = os.path.join(data_dir, region)
                 images_list = [f for f in os.listdir(region_dir) if f.endswith(self.img_format)]
                 for j, img in enumerate(sorted(images_list)):
                     if j % 100 == 0:
-                        logging.info('Iterating image number: %i / %i' % (j, len(images_list)))
-                    logging.info('___prepare patches for img: %s' % str(img))
+                        logging.info('(progress) Iterating image number: %i / %i' % (j, len(images_list)))
+                    logging.info('__prepare patches for img: %s' % str(img))
                     name_img = img.split('.')[0]
                     image = cv2.imread(os.path.join(region_dir, img))
+                    if name_img + '.csv' not in os.listdir(os.path.join(annot_dir, region)):
+                        logging.info('___not annotations for img: %s' % str(img))
+                        continue
                     annot_list = self.get_annotations(os.path.join(annot_dir, region, name_img + '.csv'))
                     mask = create_mask_with_annotations_circle(image, annot_list)
                     assert len(np.unique(mask)) <= 2, 'more than 2 color pixels'
@@ -83,6 +81,7 @@ class CreatePatchesAmida13(CreatePatches):
                                                          patch_size=options['patch_size'])
 
                     self.create_patches_with_patchify(image, mask, aux_name_img, patch_size=options['patch_size'])
+
 
 
 if __name__ == '__main__':
