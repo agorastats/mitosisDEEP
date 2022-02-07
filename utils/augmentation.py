@@ -253,7 +253,7 @@ from albumentations import (
 # possible errors, fix cv2: https://exerror.com/importerror-cannot-import-name-_registermattype-from-cv2-cv2/
 # To Solve ImportError: cannot import name '_registerMatType' from 'cv2.cv2' Error You just have to Downgrade opencv-python-headless to the 4.1.2.30 Because of opencv-python(4.1.2.30) does not match opencv-python-headless latest version and thats why this error occurs. So first of all Just uninstall opencv-python-headless with this command: pip uninstall opencv-python-headless and now, install opencv-python-headless==4.1.2.30 with this command: pip install opencv-python-headless==4.1.2.30 Now, Your error must be solved.
 
-AUGMENTATIONS_PIPELINE = Compose([
+AUG_IMG_PIPELINE = Compose([
     HorizontalFlip(p=0.5),
     VerticalFlip(p=0.5),
     GaussNoise(var_limit=0.02, p=0.2),
