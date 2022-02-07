@@ -9,7 +9,8 @@ from utils.runnable import Main
 
 # AMIDA13 challenge. # These cases were collected from the Department of Pathology
 # at the University Medical Center in Utrecht, The Netherlands.
-FOLDERS_NAME = ['mitoses_image_data_part_1', 'mitoses_image_data_part_2', 'mitoses_image_data_part_3']  # training folder images
+
+FOLDERS_NAME = ['mitoses_image_data_part_1', 'mitoses_image_data_part_2', 'mitoses_image_data_part_3']
 DATA_PATH = 'data/AMIDA13'  # path that contains inside it training folder images
 ANNOT_PATH = 'data/AMIDA13/mitoses_ground_truth'
 
@@ -33,7 +34,7 @@ class CreatePatchesAmida13(CreatePatches):
                 continue
             # Parse line into list of numbers
             points = list(map(lambda x: x, line.strip().split(',')))
-            points = [int(p) for p in points][::-1]   # reverse it, interpret as rows (width), columns (height)
+            points = [int(p) for p in points][::-1]  # reverse it, interpret as rows (width), columns (height)
             try:
                 result.append(points)
             except:
@@ -81,7 +82,6 @@ class CreatePatchesAmida13(CreatePatches):
                                                          patch_size=options['patch_size'])
 
                     self.create_patches_with_patchify(image, mask, aux_name_img, patch_size=options['patch_size'])
-
 
 
 if __name__ == '__main__':
