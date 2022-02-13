@@ -24,19 +24,21 @@ def img2np(img):
     return img.transpose(2, 1, 0)
 
 
-def read_image(filename, size):
+def read_image(filename, size=None):
     assert os.path.exists(filename), 'Problems reading filename %s' % filename
     image = cv2.imread(filename)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # need to change to train in RGB format the nets
-    image = cv2.resize(image, (size, size))
+    if size:
+        image = cv2.resize(image, (size, size))
     return image
 
 
-def read_mask(filename, size):
+def read_mask(filename, size=None):
     assert os.path.exists(filename), 'Problems reading filename %s' % filename
     image = cv2.imread(filename)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    image = cv2.resize(image, (size, size))
+    if size:
+        image = cv2.resize(image, (size, size))
     (thresh, black_white_image) = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY)
     return black_white_image
 
