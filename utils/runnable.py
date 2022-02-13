@@ -69,6 +69,7 @@ class Prova(Runnable):
 
     def run(self, options):
         test = options['test']
+        logging.info('__options %s' % str(test))
 
 
 if __name__ == '__main__':

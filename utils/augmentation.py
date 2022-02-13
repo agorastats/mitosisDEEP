@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 
 from scipy.ndimage.filters import gaussian_filter
-from utils.preprocess import Normalizer
+from utils.preprocessStain import Normalizer
 
 
 

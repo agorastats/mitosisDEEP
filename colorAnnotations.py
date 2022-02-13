@@ -6,7 +6,7 @@ import numpy as np
 if __name__ == '__main__':
     from utils.image import show_image
     # https://stackoverflow.com/questions/65138694/opencv-blob-defect-anomaly-detection
-    img = cv2.imread("data/03x.jpg")
+    img = cv2.imread("sample_data/03x.jpg")
     show_image(img)
     mean = np.mean(img, axis=(0, 1))
     std = np.std(img, axis=(0, 1))

@@ -8,14 +8,14 @@ from utils.augmentation import aug_generator, stain_normalizer, TRANSFORM_PROB_D
 from utils.image import create_dir
 
 # path that contains inside it two folders with patches: images, masks
-DATA_PATH = 'patches'
+DATA_PATH = 'sample_data'
 AUG_VALUE = 5
-REF_IMAGE = 'utils/ref_he.jpg'
+REF_IMAGE = 'ideas/ref_he.jpg'
 STAIN_NORM = True
-OUT_IMAGES_FOLDER = 'images_aug_2022_01_12'    # folder to save patches of images
-OUT_MASKS_FOLDER = 'masks_aug_2022_01_12'     # folder to save patches of masks
-INPUT_IMAGES_FOLDER = 'images_2022_01_12'             # folder inside DATA_PATH containing images patches
-INPUT_MASKS_FOLDER = 'masks_2022_01_12'               # folder inside DATA_PATH containing masks patches
+OUT_IMAGES_FOLDER = 'sample_img_augmented'    # folder to save patches of images
+OUT_MASKS_FOLDER = 'sample_mask_augmented'     # folder to save patches of masks
+INPUT_IMAGES_FOLDER = 'sample_img_patches'             # folder inside DATA_PATH containing images patches
+INPUT_MASKS_FOLDER = 'sample_mask_patches'               # folder inside DATA_PATH containing masks patches
 
 
 def update_augmentations_on_image_info(info_aug_df_list, name_aug, prob):
