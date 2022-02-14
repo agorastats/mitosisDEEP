@@ -57,6 +57,7 @@ class EvaluateLargeImageProcess(Runnable):
         patches = patchify(img, (self.patchify_size, self.patchify_size, 3), step=self.patchify_size)
         patches = patches[:, :, 0, :, :, :]
         predicted_patches = []
+        logging.info('__predict patches')
         for i in range(patches.shape[0]):
             for j in range(patches.shape[1]):
                 single_patch = patches[i, j, :, :, :]
@@ -68,6 +69,7 @@ class EvaluateLargeImageProcess(Runnable):
         predicted_patches_reshaped = np.reshape(predicted_patches,
                                                 [patches.shape[0], patches.shape[1], patches.shape[2],
                                                  patches.shape[3]])
+        logging.info('__reconstruct image with patches')
         reconstructed_image = unpatchify(predicted_patches_reshaped, (img.shape[0], img.shape[1]))
         return reconstructed_image
 
