@@ -59,7 +59,8 @@ class EvaluateLargeImageProcess(Runnable):
         predicted_patches = []
         for i in range(patches.shape[0]):
             for j in range(patches.shape[1]):
-                single_patch = patches[i, j, :, :, :] / 255.
+                single_patch = patches[i, j, :, :, :]
+                single_patch = self.apply_preprocess(single_patch)
                 single_patch = np.expand_dims(single_patch, axis=0)  # (x,y,3) to (1,x,y,3)
                 single_patch_prediction = (self.model.predict(single_patch) > 0.5).astype(np.uint8)
                 predicted_patches.append(single_patch_prediction[0, :, :])
@@ -78,7 +79,6 @@ class EvaluateLargeImageProcess(Runnable):
         img = cv2.resize(img, (size_x, size_y))
         logging.info('test image resized size: (%i, %i)', img.shape[0], img.shape[1])
 
-        # img = self.apply_preprocess(img)
         pred_img = self.predict_using_patchify(img)
 
         return pred_img, size_x, size_y
@@ -91,7 +91,8 @@ class EvaluateLargeImageProcess(Runnable):
             name_img = f.split('.')[0]
             pred_img, size_x, size_y = self.predict_image(img)
             # cv2.imwrite(os.path.join(self.output_info, name_img), pred_img)
-            auxDF = pd.DataFrame({'id': f, 'size_x': size_x, 'size_y': size_y, 'rle': rle_encode(pred_img)})
+            values_dict = {'id': f, 'size_x': size_x, 'size_y': size_y, 'rle': rle_encode(pred_img)}
+            auxDF = pd.DataFrame(values_dict, index=[0])
             infoDFList.append(auxDF)
 
         infoDF = pd.concat(infoDFList, ignore_index=True)
