@@ -59,7 +59,7 @@ class EvaluateLargeImageProcess(Runnable):
         predicted_patches = []
         for i in range(patches.shape[0]):
             for j in range(patches.shape[1]):
-                single_patch = patches[i, j, :, :, :] / 255.  # normalize it
+                single_patch = patches[i, j, :, :, :]
                 single_patch = np.expand_dims(single_patch, axis=0)  # (x,y,3) to (1,x,y,3)
                 single_patch_prediction = (self.model.predict(single_patch) > 0.5).astype(np.uint8)
                 predicted_patches.append(single_patch_prediction[0, :, :])
