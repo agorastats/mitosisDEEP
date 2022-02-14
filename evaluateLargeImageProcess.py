@@ -45,9 +45,9 @@ class EvaluateLargeImageProcess(Runnable):
         create_dir(output_info)
 
     def apply_preprocess(self, img):
-        img = img.astype('float64')
+        img = img.astype('float32')
         if self.preprocess is None:
-            img /= 255.
+            img = img/255.
         else:
             img = self.preprocess(img)
         return img
