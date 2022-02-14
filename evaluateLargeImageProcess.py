@@ -5,24 +5,11 @@ import numpy as np
 import pandas as pd
 
 from patchify import patchify, unpatchify
-from utils.image import read_image, create_dir
+from utils.image import read_image, create_dir, rle_encode
 from utils.loadAndSaveResults import store_data_frame
 from utils.runnable import Runnable, Main
 
-# ref:  https://www.kaggle.com/paulorzp/run-length-encode-and-decode
 # dice coefficient: https://www.kaggle.com/yerramvarun/understanding-dice-coefficient
-
-def rle_encode(img):
-    '''
-    # ref: https://www.kaggle.com/stainsby/fast-tested-rle
-    img: numpy array, 1 - mask, 0 - background
-    Returns run length as string formated
-    '''
-    pixels = img.flatten()
-    pixels = np.concatenate([[0], pixels, [0]])
-    runs = np.where(pixels[1:] != pixels[:-1])[0] + 1
-    runs[1::2] -= runs[::2]
-    return ' '.join(str(x) for x in runs)
 
 
 class EvaluateLargeImageProcess(Runnable):
