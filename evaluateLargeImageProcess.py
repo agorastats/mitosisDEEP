@@ -86,7 +86,7 @@ class EvaluateLargeImageProcess(Runnable):
     def run(self, options):
         infoDFList = list()
         for i, f in enumerate(self.df.loc[:, 'id']):
-            logging.info('__predict image %s:' % str(f))
+            logging.info('__predict image: %s' % str(f))
             img = read_image(os.path.join(self.img_path, f))
             name_img = f.split('.')[0]
             pred_img, size_x, size_y = self.predict_image(img)
