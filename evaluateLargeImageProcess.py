@@ -45,6 +45,7 @@ class EvaluateLargeImageProcess(Runnable):
         create_dir(output_info)
 
     def apply_preprocess(self, img):
+        img = img.astype('float64')
         if self.preprocess is None:
             img /= 255.
         else:
@@ -98,7 +99,8 @@ class EvaluateLargeImageProcess(Runnable):
 
 
 if __name__ == '__main__':
-    eval = EvaluateLargeImageProcess(df=pd.DataFrame({'id': [123]}, index=[0]), img_path='sample_data')
+    eval = EvaluateLargeImageProcess(df=pd.DataFrame({'id': ['02x.jpg']}, index=[0]), img_path='sample_data',
+                                     model='', output_info='sample_data')
     eval.run({})
 
     # Main(
