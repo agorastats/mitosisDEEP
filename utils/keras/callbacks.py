@@ -34,7 +34,7 @@ def csv_logger(output_name, append=True, separator=';'):
     # callback to save logs of epochs model as csv
     output_path = os.path.join(LOGS_CSV_PATH, '%s.csv' % str(output_name))
     store_data_frame(pd.DataFrame(), output_path)
-    return tf.keras.callbakcs.CSVLogger(output_path, append=append, separator=separator)
+    return tf.keras.callbacks.CSVLogger(output_path, append=append, separator=separator)
 
 
 class UpdateLoggerToDrive(tf.keras.callbacks.Callback):
