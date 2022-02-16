@@ -3,8 +3,10 @@ import os
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+
 from os import makedirs, path
 from PIL import Image
+from skimage.measure import label, regionprops
 
 MAX_SIZE = 255.
 
@@ -141,6 +143,7 @@ def rle_encode(img):
     runs[1::2] -= runs[::2]
     return ' '.join(str(x) for x in runs)
 
+
 def rle_decode(mask_rle, shape):
     '''
     mask_rle: run-length as string formated (start length)
@@ -152,7 +155,46 @@ def rle_decode(mask_rle, shape):
     starts, lengths = [np.asarray(x, dtype=int) for x in (s[0:][::2], s[1:][::2])]
     starts -= 1
     ends = starts + lengths
-    img = np.zeros(shape[0]*shape[1], dtype=np.uint8)
+    img = np.zeros(shape[0] * shape[1], dtype=np.uint8)
     for lo, hi in zip(starts, ends):
         img[lo:hi] = 1
     return img.reshape(shape)
+
+
+def maskInColor(image: np.ndarray,
+                mask: np.ndarray,
+                color: tuple = (0, 0, 255),
+                alpha: float = 0.2) -> np.ndarray:
+    image = np.array(image)
+    H, W, C = image.shape
+    mask = mask.reshape(H, W, 1)
+    overlay = image.astype(np.float32)
+    overlay = 255 - (255 - overlay) * (1 - mask * alpha * color / 255)
+    overlay = np.clip(overlay, 0, 255)
+    overlay = overlay.astype(np.uint8)
+    return overlay
+
+
+def trace_boundingBox(image: np.ndarray,
+                      mask: np.ndarray,
+                      color: tuple = (0, 0, 255),
+                      width: int = 10):
+    """
+    Draw a bounding box on image
+
+     Parameter
+     ----------
+     image : image on which we want to draw the box
+     mask  : mask to process
+     color : color we want to use to draw the box edges
+     width : box edges's width
+
+    """
+
+    lbl = label(mask)
+    props = regionprops(lbl)
+    for prop in props:
+        coin1 = (prop.bbox[3], prop.bbox[2])
+        coin2 = (prop.bbox[1], prop.bbox[0])
+        cv2.rectangle(image, coin2, coin1, color, width)
+    return image
