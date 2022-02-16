@@ -87,12 +87,3 @@ class EvaluateLargeImageProcess(Runnable):
         infoDF = pd.concat(infoDFList, ignore_index=True)
         store_data_frame(infoDF, os.path.join(self.output_info, 'pred_info.csv'))
 
-
-if __name__ == '__main__':
-    eval = EvaluateLargeImageProcess(df=pd.DataFrame({'id': ['02x.jpg']}, index=[0]), img_path='sample_data',
-                                     model='', output_info='sample_data')
-    eval.run({})
-
-    # Main(
-    #     EvaluateLargeImageProcess(df=pd.DataFrame({'id': [123]}, index=[0]), img_path='sample_data')
-    #     ).run()
