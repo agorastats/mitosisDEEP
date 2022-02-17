@@ -10,12 +10,12 @@ LOGS_DRIVE_PATH = '/content/drive/MyDrive/mitosis_data/logs/'
 WEIGHTS_DRIVE_PATH = '/content/drive/MyDrive/mitosis_data'
 LOGS_CSV_PATH = 'logsCSV'
 
-def early_stop(monitor='val_loss', patience=20):
+def early_stop(monitor='val_loss', patience=10):
     # early stop if patience epochs not improve monitor metric/loss
     return tf.keras.callbacks.EarlyStopping(monitor=monitor, patience=patience)
 
 
-def reduce_lr(monitor='val_loss', factor=0.2, patience=10, min_lr=0.000001, verbose=1):
+def reduce_lr(monitor='val_loss', factor=0.2, patience=5, min_lr=0.0000001, verbose=1):
     # reduce learning rate by factor if not improve monitor in patience epochs
     return tf.keras.callbacks.ReduceLROnPlateau(monitor=monitor, factor=factor,
                                                 patience=patience, min_lr=min_lr, verbose=verbose)
