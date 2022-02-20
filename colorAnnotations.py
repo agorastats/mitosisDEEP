@@ -1,14 +1,10 @@
-import os
 import cv2
 import numpy as np
-from skimage.measure import label, regionprops
-from utils.loadAndSaveResults import read_data_frame
-from utils.image import trace_boundingBox, maskInColor
+from utils.image import show_image
 
 
 
 if __name__ == '__main__':
-    from utils.image import show_image, rle_decode
 
     # https://stackoverflow.com/questions/65138694/opencv-blob-defect-anomaly-detection
     img = cv2.imread("sample_data/03x.jpg")
@@ -20,6 +16,6 @@ if __name__ == '__main__':
     show_image(mask_u8)
     contours, _ = cv2.findContours(mask_u8, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     candidates = sorted(contours, key=cv2.contourArea, reverse=True)
-    # cv2.drawContours(img, [candidates coords], -1, (255, 0, 0), 3)
+    # cv2.drawContours(img, [each candidates coords], -1, (255, 0, 0), 3)
     pass
 

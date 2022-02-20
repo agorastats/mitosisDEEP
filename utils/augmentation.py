@@ -4,15 +4,14 @@ import cv2
 import numpy as np
 
 from scipy.ndimage.filters import gaussian_filter
-from utils.preprocessStain import Normalizer
-
-
+from utils.stain.preprocessStain import Normalizer
 
 # probability of success functional, i.e, patch k has functional with prob = TRANSFORM_PROB_DICT[functional]
 TRANSFORM_PROB_DICT = {'stain_norm': 0.2, 'gaussian_noise': 0.5, 'rotate': 1,
                        'blur': 0.3, 'shift_scale_rotate': 0.7, 'distorsion': 0.5, 'contrast_or_brightness': 0.2}
 # functional using on patches
 TRANSFORM_COLS = list(TRANSFORM_PROB_DICT.keys())
+
 
 def to_tuple(param, low=None):
     if isinstance(param, tuple):
@@ -28,7 +27,7 @@ def rotate(img, angle=30, k_limit=(1, 6), seed=None):
         random_state = np.random.RandomState(seed)
     angle = angle * random_state.randint(k_limit[0], k_limit[1])
     height, width = img.shape[0:2]
-    mat = cv2.getRotationMatrix2D((width/2, height/2), angle, 1.0)
+    mat = cv2.getRotationMatrix2D((width / 2, height / 2), angle, 1.0)
     img = cv2.warpAffine(np.float32(img), mat, (width, height),
                          flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT_101)
     return img
@@ -60,7 +59,6 @@ def elastic_transform(image, alpha=1, sigma=30, alpha_affine=3, seed=None):
     shape = image.shape
     shape_size = shape[:2]
 
-
     # Random affine
     center_square = np.float32(shape_size) // 2
     square_size = min(shape_size) // 3
@@ -85,7 +83,8 @@ def elastic_transform(image, alpha=1, sigma=30, alpha_affine=3, seed=None):
 
     return cv2.remap(image, mapx, mapy, interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT_101)
 
-def gaussian_noise(image, var_limit=(10,30), seed=None):
+
+def gaussian_noise(image, var_limit=(10, 30), seed=None):
     if seed is None:
         random_state = np.random.RandomState(1234)
     else:
@@ -93,9 +92,9 @@ def gaussian_noise(image, var_limit=(10,30), seed=None):
     row, col, ch = image.shape
     var = random_state.randint(var_limit[0], var_limit[1])
     mean = var
-    sigma = var**0.5
-    gauss = np.random.normal(mean,sigma,(row,col,ch))
-    gauss = gauss.reshape(row,col,ch)
+    sigma = var ** 0.5
+    gauss = np.random.normal(mean, sigma, (row, col, ch))
+    gauss = gauss.reshape(row, col, ch)
     gauss = (gauss - np.min(gauss)).astype(np.uint8)
     return image.astype(np.int32) + gauss
 
@@ -175,13 +174,13 @@ def shift_scale_rotate(img, shift_limit=0.2, scale_limit=0.1, rotate_limit=45, s
 
     height, width = img.shape[:2]
 
-    cc = math.cos(angle/180*math.pi) * scale
-    ss = math.sin(angle/180*math.pi) * scale
+    cc = math.cos(angle / 180 * math.pi) * scale
+    ss = math.sin(angle / 180 * math.pi) * scale
     rotate_matrix = np.array([[cc, -ss], [ss, cc]])
 
-    box0 = np.array([[0, 0], [width, 0],  [width, height], [0, height], ])
-    box1 = box0 - np.array([width/2, height/2])
-    box1 = np.dot(box1, rotate_matrix.T) + np.array([width/2+dx*width, height/2+dy*height])
+    box0 = np.array([[0, 0], [width, 0], [width, height], [0, height], ])
+    box1 = box0 - np.array([width / 2, height / 2])
+    box1 = np.dot(box1, rotate_matrix.T) + np.array([width / 2 + dx * width, height / 2 + dy * height])
 
     box0 = box0.astype(np.float32)
     box1 = box1.astype(np.float32)
@@ -196,6 +195,7 @@ def stain_normalizer(ref_image):
     stain_norm = Normalizer()
     stain_norm.fit(img)
     return stain_norm
+
 
 def aug_generator(image, mask, seed=None, stain_norm=None):
     if seed is None:
@@ -243,15 +243,18 @@ def aug_generator(image, mask, seed=None, stain_norm=None):
 
 
 from albumentations import (
-    Compose, HorizontalFlip, CLAHE, HueSaturationValue,
-    RandomBrightness, RandomContrast, RandomGamma, OneOf,
-    ToFloat, ShiftScaleRotate, GridDistortion, ElasticTransform, JpegCompression, HueSaturationValue,
-    RGBShift, RandomBrightness, RandomContrast, Blur, MotionBlur, MedianBlur, GaussNoise, CenterCrop,
-    IAAAdditiveGaussianNoise, GaussNoise, OpticalDistortion, RandomSizedCrop, VerticalFlip
+    Compose, HorizontalFlip, OneOf,
+    GridDistortion, ElasticTransform, RandomBrightness, RandomContrast, Blur, GaussNoise, OpticalDistortion,
+    VerticalFlip
 )
 
 # possible errors, fix cv2: https://exerror.com/importerror-cannot-import-name-_registermattype-from-cv2-cv2/
-# To Solve ImportError: cannot import name '_registerMatType' from 'cv2.cv2' Error You just have to Downgrade opencv-python-headless to the 4.1.2.30 Because of opencv-python(4.1.2.30) does not match opencv-python-headless latest version and thats why this error occurs. So first of all Just uninstall opencv-python-headless with this command: pip uninstall opencv-python-headless and now, install opencv-python-headless==4.1.2.30 with this command: pip install opencv-python-headless==4.1.2.30 Now, Your error must be solved.
+# To Solve ImportError: cannot import name '_registerMatType' from 'cv2.cv2'
+# Error You just have to Downgrade opencv-python-headless to the 4.1.2.30 Because of opencv-python(4.1.2.30)
+# does not match opencv-python-headless latest version and thats why this error occurs.
+# So first of all Just uninstall opencv-python-headless with this command: pip uninstall opencv-python-headless and now,
+# install opencv-python-headless==4.1.2.30
+# with this command: pip install opencv-python-headless==4.1.2.30 Now, Your error must be solved.
 
 AUG_IMG_PIPELINE = Compose([
     HorizontalFlip(p=0.5),
@@ -264,5 +267,5 @@ AUG_IMG_PIPELINE = Compose([
         ElasticTransform(alpha=100, sigma=6, alpha_affine=3),
         GridDistortion(distort_limit=0.15),
         OpticalDistortion(distort_limit=1, shift_limit=0.2)
-        ], p=0.3)
+    ], p=0.3)
 ], p=1)

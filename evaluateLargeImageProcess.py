@@ -9,12 +9,16 @@ from utils.image import read_image, create_dir, rle_encode
 from utils.loadAndSaveResults import store_data_frame
 from utils.runnable import Runnable, Main
 
+
 # dice coefficient: https://www.kaggle.com/yerramvarun/understanding-dice-coefficient
+from utils.stain.preprocessStain import Normalizer
+
+STAIN_REF_IMG = 'utils/stain/A00_01_ref_img.bmp'
 
 
 class EvaluateLargeImageProcess(Runnable):
     def __init__(self, df=None, patchify_size=256, img_path=None, mask_path=None, preprocess=None,
-                 model=None, output_info=None):
+                 model=None, stain=False, stain_ref_img=None, output_info=None):
         super().__init__()
         assert img_path is not None, 'need to fill img_path!'
         assert df is not None, 'need to fill df with images info!'
@@ -31,16 +35,36 @@ class EvaluateLargeImageProcess(Runnable):
         self.output_info = output_info
         create_dir(output_info)
 
+        # resolve stain
+        self.stain_norm = None
+        self.stain = stain
+        if self.stain:
+            self.init_stain_norm(STAIN_REF_IMG if stain_ref_img is None else stain_ref_img)
+
+    def init_stain_norm(self, img):
+        img = read_image(img)
+        stain_norm = Normalizer()
+        stain_norm.fit(img)
+        self.stain_norm = stain_norm
+
+    def apply_stain_normalization(self, img):
+        img = self.stain_norm.transform(img)
+        return img
+
     def apply_preprocess(self, img):
+        if self.stain:
+            img = self.apply_stain_normalization(img)
+
         img = img.astype('float32')
         if self.preprocess is None:
-            img = img/255.
+            img = img / 255.
         else:
             img = self.preprocess(img)
         return img
 
     def predict_using_patchify(self, img):
         # step same as patch for not overlap patches
+        img = self.apply_preprocess(img)
         patches = patchify(img, (self.patchify_size, self.patchify_size, 3), step=self.patchify_size)
         patches = patches[:, :, 0, :, :, :]
         predicted_patches = []
@@ -48,7 +72,7 @@ class EvaluateLargeImageProcess(Runnable):
         for i in range(patches.shape[0]):
             for j in range(patches.shape[1]):
                 single_patch = patches[i, j, :, :, :]
-                single_patch = self.apply_preprocess(single_patch)
+                # single_patch = self.apply_preprocess(single_patch)
                 single_patch = np.expand_dims(single_patch, axis=0)  # (x,y,3) to (1,x,y,3)
                 single_patch_prediction = (self.model.predict(single_patch) > 0.5).astype(np.uint8)
                 predicted_patches.append(single_patch_prediction[0, :, :])
@@ -86,4 +110,3 @@ class EvaluateLargeImageProcess(Runnable):
 
         infoDF = pd.concat(infoDFList, ignore_index=True)
         store_data_frame(infoDF, os.path.join(self.output_info, 'pred_info.csv'))
-
