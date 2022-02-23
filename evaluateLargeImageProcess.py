@@ -7,11 +7,9 @@ import pandas as pd
 from patchify import patchify, unpatchify
 from utils.image import read_image, create_dir, rle_encode
 from utils.loadAndSaveResults import store_data_frame
-from utils.runnable import Runnable, Main
-
-
-# dice coefficient: https://www.kaggle.com/yerramvarun/understanding-dice-coefficient
+from utils.runnable import Runnable
 from utils.stain.preprocessStain import Normalizer
+
 
 STAIN_REF_IMG = 'utils/stain/A00_01_ref_img.bmp'
 
@@ -37,34 +35,32 @@ class EvaluateLargeImageProcess(Runnable):
 
         # resolve stain
         self.stain_norm = None
-        self.stain = stain
-        if self.stain:
+        self.stain = [False] if stain is False else [False, True]
+        if any(self.stain):
             self.init_stain_norm(STAIN_REF_IMG if stain_ref_img is None else stain_ref_img)
 
     def init_stain_norm(self, img):
         img = read_image(img)
-        stain_norm = Normalizer()
-        stain_norm.fit(img)
-        self.stain_norm = stain_norm
+        self.stain_norm = Normalizer()
+        self.stain_norm.fit(img)
 
     def apply_stain_normalization(self, img):
         img = self.stain_norm.transform(img)
         return img
 
-    def apply_preprocess(self, img):
-        if self.stain:
-            img = self.apply_stain_normalization(img)
-
+    def apply_preprocess(self, img, stain):
         img = img.astype('float32')
+        if stain:
+            img = self.apply_stain_normalization(img)
         if self.preprocess is None:
             img = img / 255.
         else:
             img = self.preprocess(img)
         return img
 
-    def predict_using_patchify(self, img):
+    def predict_using_patchify(self, img, stain):
         # step same as patch for not overlap patches
-        img = self.apply_preprocess(img)
+        img = self.apply_preprocess(img, stain)
         patches = patchify(img, (self.patchify_size, self.patchify_size, 3), step=self.patchify_size)
         patches = patches[:, :, 0, :, :, :]
         predicted_patches = []
@@ -84,15 +80,14 @@ class EvaluateLargeImageProcess(Runnable):
         reconstructed_image = unpatchify(predicted_patches_reshaped, (img.shape[0], img.shape[1]))
         return reconstructed_image
 
-    def predict_image(self, img):
+    def predict_image(self, img, stain=False):
         # nearest size divisible by our patch size
         size_x = (img.shape[1] // self.patchify_size) * self.patchify_size
         size_y = (img.shape[0] // self.patchify_size) * self.patchify_size
         logging.info('test image size: (%i, %i)', img.shape[0], img.shape[1])
         img = cv2.resize(img, (size_x, size_y))
         logging.info('test image resized size: (%i, %i)', img.shape[0], img.shape[1])
-
-        pred_img = self.predict_using_patchify(img)
+        pred_img = self.predict_using_patchify(img, stain)
 
         return pred_img, size_x, size_y
 
@@ -101,12 +96,12 @@ class EvaluateLargeImageProcess(Runnable):
         for i, f in enumerate(self.df.loc[:, 'id']):
             logging.info('__predict image: %s' % str(f))
             img = read_image(os.path.join(self.img_path, f))
-            name_img = f.split('.')[0]
-            pred_img, size_x, size_y = self.predict_image(img)
-            # cv2.imwrite(os.path.join(self.output_info, name_img), pred_img)
-            values_dict = {'id': f, 'size_x': size_x, 'size_y': size_y, 'rle': rle_encode(pred_img)}
-            auxDF = pd.DataFrame(values_dict, index=[0])
-            infoDFList.append(auxDF)
+            for stain in self.stain:
+                pred_img, size_x, size_y = self.predict_image(img, stain=stain)
+                values_dict = {'id': f, 'stain': stain, 'size_x': size_x, 'size_y': size_y, 'rle': rle_encode(pred_img)}
+                auxDF = pd.DataFrame(values_dict, index=[0])
+                infoDFList.append(auxDF)
 
         infoDF = pd.concat(infoDFList, ignore_index=True)
         store_data_frame(infoDF, os.path.join(self.output_info, 'pred_info.csv'))
+

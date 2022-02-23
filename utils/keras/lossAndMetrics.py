@@ -4,6 +4,7 @@ from keras.losses import binary_crossentropy
 
 # ref: https://github.com/nauyan/Segmentation/blob/master/Code/utils/lossfunctions.py
 # ref: https://github.com/nauyan/Segmentation/blob/master/Code/utils/metricfunctions.py
+# ref: dice coefficient: https://www.kaggle.com/yerramvarun/understanding-dice-coefficient
 
 
 def dice_coef(y_true, y_pred):
