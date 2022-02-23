@@ -64,11 +64,10 @@ class EvaluateLargeImageProcess(Runnable):
         patches = patchify(img, (self.patchify_size, self.patchify_size, 3), step=self.patchify_size)
         patches = patches[:, :, 0, :, :, :]
         predicted_patches = []
-        logging.info('__predict patches')
+        logging.info('____predict patches')
         for i in range(patches.shape[0]):
             for j in range(patches.shape[1]):
                 single_patch = patches[i, j, :, :, :]
-                # single_patch = self.apply_preprocess(single_patch)
                 single_patch = np.expand_dims(single_patch, axis=0)  # (x,y,3) to (1,x,y,3)
                 single_patch_prediction = (self.model.predict(single_patch) > 0.5).astype(np.uint8)
                 predicted_patches.append(single_patch_prediction[0, :, :])
@@ -76,17 +75,18 @@ class EvaluateLargeImageProcess(Runnable):
         predicted_patches_reshaped = np.reshape(predicted_patches,
                                                 [patches.shape[0], patches.shape[1], patches.shape[2],
                                                  patches.shape[3]])
-        logging.info('__reconstruct image with patches')
+        logging.info('____reconstruct image with patches')
         reconstructed_image = unpatchify(predicted_patches_reshaped, (img.shape[0], img.shape[1]))
         return reconstructed_image
 
     def predict_image(self, img, stain=False):
+        logging.info('__predict with stain: %s' % str(stain))
         # nearest size divisible by our patch size
         size_x = (img.shape[1] // self.patchify_size) * self.patchify_size
         size_y = (img.shape[0] // self.patchify_size) * self.patchify_size
-        logging.info('test image size: (%i, %i)', img.shape[0], img.shape[1])
+        logging.info('___test image size: (%i, %i)', img.shape[1], img.shape[0])
         img = cv2.resize(img, (size_x, size_y))
-        logging.info('test image resized size: (%i, %i)', img.shape[0], img.shape[1])
+        logging.info('___test image resized size: (%i, %i)', img.shape[1], img.shape[0])
         pred_img = self.predict_using_patchify(img, stain)
 
         return pred_img, size_x, size_y
@@ -94,7 +94,7 @@ class EvaluateLargeImageProcess(Runnable):
     def run(self, options):
         infoDFList = list()
         for i, f in enumerate(self.df.loc[:, 'id']):
-            logging.info('__predict image: %s' % str(f))
+            logging.info('predict image: %s' % str(f))
             img = read_image(os.path.join(self.img_path, f))
             for stain in self.stain:
                 pred_img, size_x, size_y = self.predict_image(img, stain=stain)
