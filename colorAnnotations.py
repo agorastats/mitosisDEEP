@@ -19,7 +19,6 @@ if __name__ == '__main__':
     # cv2.drawContours(img, [each candidates coords], -1, (255, 0, 0), 3)
     pass
 
-
     patchesInfoDF = read_data_frame('patches/20220207/infoDF.csv')
 
     resultDict = dict()

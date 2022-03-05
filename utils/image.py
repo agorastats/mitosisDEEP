@@ -41,7 +41,7 @@ def read_mask(filename, size=None):
     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     if size:
         image = cv2.resize(image, (size, size))
-    (thresh, black_white_image) = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY)
+    (thresh, black_white_image) = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY)   # binarize it
     return black_white_image
 
 
