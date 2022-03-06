@@ -8,8 +8,9 @@ from createPatches.base import CreatePatches
 from utils.image import create_mask_with_annotations_circle
 
 # data images (training data set) from: https://mitos-atypia-14.grand-challenge.org/Donwload/
-FOLDERS_NAME = ['A03', 'A04', 'A05', 'A07', 'A10', 'A11', 'A15', 'A17', 'A18']  # falta el A14
-# + ['H0%i_v2' % i for i in range(5)]  # training folder images
+FOLDERS_NAME = ['A03', 'A04', 'A05', 'A07', 'A10', 'A11', 'A12', 'A14', 'A15', 'A17', 'A18'] + \
+               ['H03', 'H04', 'H05', 'H07', 'H10', 'H11', 'H12', 'H14', 'H15', 'H17', 'H18']
+
 DATA_PATH = 'data/icpr14'  # path that contains inside it training folder images
 
 

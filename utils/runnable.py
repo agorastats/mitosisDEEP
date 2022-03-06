@@ -1,5 +1,6 @@
 import logging
 import optparse
+import os
 import sys
 
 from abc import ABCMeta, abstractmethod
@@ -35,6 +36,8 @@ class Main(object):
         self._executable = executable
         self._options = None
         self.calling_logging()
+        # get relative directory
+        os.chdir(os.path.realpath(os.path.join(os.path.dirname(__file__), '..')))
 
     @staticmethod
     def calling_logging():
