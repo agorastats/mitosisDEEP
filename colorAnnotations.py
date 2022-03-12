@@ -1,10 +1,93 @@
+import json
+
 import cv2
 import numpy as np
+import pandas as pd
+
 from utils.image import show_image, read_image
-from utils.loadAndSaveResults import read_data_frame
+from utils.loadAndSaveResults import read_data_frame, read_json
+
+
+def convert_coco_json_to_csv(filename):
+    import pandas as pd
+    import json
+
+    # COCO2017/annotations/instances_val2017.json
+    s = json.load(open(filename, 'r'))
+    out_file = filename[:-5] + '.csv'
+    out = open(out_file, 'w')
+    out.write('id,x1,y1,x2,y2,label\n')
+
+    all_ids = []
+    for im in s['images']:
+        all_ids.append(im['id'])
+
+    all_ids_ann = []
+    for ann in s['annotations']:
+        image_id = ann['image_id']
+        all_ids_ann.append(image_id)
+        x1 = ann['bbox'][0]
+        x2 = ann['bbox'][0] + ann['bbox'][2]
+        y1 = ann['bbox'][1]
+        y2 = ann['bbox'][1] + ann['bbox'][3]
+        label = ann['category_id']
+        out.write('{},{},{},{},{},{}\n'.format(image_id, x1, y1, x2, y2, label))
+
+    all_ids = set(all_ids)
+    all_ids_ann = set(all_ids_ann)
+    no_annotations = list(all_ids - all_ids_ann)
+    # Output images without any annotations
+    for image_id in no_annotations:
+        out.write('{},{},{},{},{},{}\n'.format(image_id, -1, -1, -1, -1, -1))
+    out.close()
+
+    # Sort file by image id
+    s1 = pd.read_csv(out_file)
+    s1.sort_values('id', inplace=True)
+    s1.to_csv(out_file, index=False)
+
+# download data: https://zenodo.org/record/4643381#.Yiy7tBuCE5n
+def get_bbox_df(image_folder="/drive/MyDrive/MIDOG_Challenge/images",
+                annotation_file="ideas/MIDOG.json"):
+    hamamatsu_rx_ids = list(range(0, 51))
+    hamamatsu_360_ids = list(range(51, 101))
+    aperio_ids = list(range(101, 151))
+    leica_ids = list(range(151, 201))
+
+    rows = []
+
+    data = read_json(annotation_file)
+    categories = {1: 'mitotic figure', 2: 'not mitotic figure'}
+
+    for row in data["images"]:
+        file_name = row["file_name"]
+        image_id = row["id"]
+        width = row["width"]
+        height = row["height"]
+
+        scanner = "Hamamatsu XR"
+        if image_id in hamamatsu_360_ids:
+            scanner = "Hamamatsu S360"
+        if image_id in aperio_ids:
+            scanner = "Aperio CS"
+        if image_id in leica_ids:
+            scanner = "Leica GT450"
+
+        for annotation in [anno for anno in data['annotations'] if anno["image_id"] == image_id]:
+            box = annotation["bbox"]
+            cat = categories[annotation["category_id"]]
+            point = [0.5 * (box[0] + box[2]), 0.5 * (box[1] + box[3])]
+            rows.append([file_name, image_id, width, height, box, point, cat, scanner])
+
+    df = pd.DataFrame(rows, columns=["file_name", "image_id", "width", "height", "box", "point", "cat", "scanner"])
+    return (df)
+
+
 
 if __name__ == '__main__':
 
+    bbox_df = get_bbox_df(annotation_file="ideas/MIDOG.json")
+    # convert_coco_json_to_csv('ideas/MIDOG.json')
     # https://stackoverflow.com/questions/65138694/opencv-blob-defect-anomaly-detection
     img = cv2.imread("sample_data/03x.jpg")
     show_image(img)

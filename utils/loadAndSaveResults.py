@@ -1,5 +1,8 @@
+import json
+import logging
 from os import path, makedirs
 import pandas as pd
+from bson import json_util
 
 
 def store_data_frame(resultsDF, filePath, sep=';', mode='w', header=True, index=False, floatFormat='%.2f'):
@@ -40,3 +43,23 @@ def read_data_frame(filePath, sep=';', header=0):
 
     return resultsDF
 
+
+def read_json(filePath, returnError=False):
+    jsonContent = {}  # jsonContent can be a DICTIONARY or a LIST or ...
+
+    errorReading = False
+    if path.exists(filePath):
+        try:
+            with open(filePath) as fp:
+                jsonContent = json.load(fp, object_hook=json_util.object_hook)
+        except:
+            errorReading = True
+            logging.error(' Error reading json ' + filePath + '\n\n', exc_info=True)
+    else:
+        errorReading = True
+        logging.warning('File ' + filePath + ' does not exist')
+
+    if returnError == True:
+        return jsonContent, errorReading
+    else:
+        return jsonContent  # jsonContent can be a DICTIONARY or a LIST or ...
