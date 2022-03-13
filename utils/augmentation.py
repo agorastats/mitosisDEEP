@@ -245,7 +245,7 @@ def aug_generator(image, mask, seed=None, stain_norm=None):
 from albumentations import (
     Compose, HorizontalFlip, OneOf,
     GridDistortion, ElasticTransform, RandomBrightness, RandomContrast, Blur, GaussNoise, OpticalDistortion,
-    VerticalFlip
+    VerticalFlip, ShiftScaleRotate
 )
 
 # possible errors, fix cv2: https://exerror.com/importerror-cannot-import-name-_registermattype-from-cv2-cv2/
@@ -262,7 +262,7 @@ AUG_IMG_PIPELINE = Compose([
     GaussNoise(var_limit=0.02, p=0.2),
     Blur(blur_limit=3, p=0.2),
     OneOf([RandomContrast(limit=0.1), RandomBrightness(limit=0.1)], p=0.3),
-    # ShiftScaleRotate(shift_limit=0.2, scale_limit=0.1, p=0.1),
+    ShiftScaleRotate(shift_limit=0.2, scale_limit=0.1, rotate_limit=45, p=0.1),
     OneOf([
         ElasticTransform(alpha=100, sigma=6, alpha_affine=3),
         GridDistortion(distort_limit=0.15),
