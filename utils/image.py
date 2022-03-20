@@ -20,7 +20,7 @@ def image_normalize(img):
 
 def img2np(img):
     img = np.asarray(img)
-    if len(img.shape) is not 3:
+    if len(img.shape) != 3:
         raise Exception("img2np function works with RGB images.")
     # Channel, Breadth, Height or Channel, Width, Height
     return img.transpose(2, 1, 0)
@@ -56,7 +56,7 @@ def read_and_normalize_image(filename, convert=None):
 
 def np2img(np_array):
     np_array = np.asarray(np_array)
-    if len(np_array.shape) is not 3:
+    if len(np_array.shape) != 3:
         raise Exception("np2img function works with 3 dimensional numpy arrays than can be converted to RGB image.")
     return np_array.transpose(2, 1, 0)
 

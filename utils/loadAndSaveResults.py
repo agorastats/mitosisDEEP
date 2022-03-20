@@ -2,7 +2,6 @@ import json
 import logging
 from os import path, makedirs
 import pandas as pd
-from bson import json_util
 
 
 def store_data_frame(resultsDF, filePath, sep=';', mode='w', header=True, index=False, floatFormat='%.2f'):
@@ -51,7 +50,7 @@ def read_json(filePath, returnError=False):
     if path.exists(filePath):
         try:
             with open(filePath) as fp:
-                jsonContent = json.load(fp, object_hook=json_util.object_hook)
+                jsonContent = json.load(fp)
         except:
             errorReading = True
             logging.error(' Error reading json ' + filePath + '\n\n', exc_info=True)
