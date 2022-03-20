@@ -44,7 +44,8 @@ class CreatePatchesBreCaHad(CreatePatches):
         # create patches over annotations list
         for i, m in enumerate(annotations_list):
             w, h = m
-            centered_at = np.random.RandomState(self.seed_count).uniform(1, 3, 2)  # to avoid centered patches
+            centered_at = np.random.RandomState(self.seed_count).uniform(self.centered_limits[0],
+                                                                         self.centered_limits[1], 2)
             image_patch = self.generate_patch(image, h, w, centered_at, patch_size=patch_size)
             mask_patch = self.generate_patch(mask, h, w, centered_at, patch_size=patch_size)
             assert sum(list(image_patch.shape)[:2]) == 2 * patch_size, \

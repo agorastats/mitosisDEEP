@@ -6,6 +6,7 @@ import sys
 from abc import ABCMeta, abstractmethod
 
 
+
 class Runnable(object, metaclass=ABCMeta):
 
     def __init__(self):
@@ -30,6 +31,20 @@ class Runnable(object, metaclass=ABCMeta):
         self.post_run(options)
 
 
+class SequenceRunnable(Runnable):
+    def __init__(self, *sequence):
+        super().__init__()
+        self._seq = sequence
+
+    def run(self, options):
+        for runnable in self._seq:
+            runnable.execute(options)
+
+    def add_options(self, parser):
+        for runnable in self._seq:
+            runnable.add_options(parser)
+
+
 class Main(object):
 
     def __init__(self, executable):
@@ -47,7 +62,7 @@ class Main(object):
         self._executable.add_options(parser)
 
     def _get_options(self, args):
-        parser = optparse.OptionParser()
+        parser = optparse.OptionParser(conflict_handler='resolve')
         self._add_options(parser)
         (options, args) = parser.parse_args(args if args is not None else sys.argv[1:])
         self._options = vars(options)

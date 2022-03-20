@@ -28,6 +28,7 @@ class CreatePatches(Runnable, metaclass=ABCMeta):
         self.img_format = None
         self.patches_list = list()
         self.patchify = True
+        self.centered_limits = [1.75, 2.25]   # to avoid centered patches
         self.seed_count = 1
 
     def add_options(self, parser):
@@ -66,7 +67,7 @@ class CreatePatches(Runnable, metaclass=ABCMeta):
 
     def create_patches_with_patchify(self, image, mask, name_img, patch_size=256, n_patches=2):
         if self.patchify:
-            # create random patches over all image (using patchify)  | Step=Size means no overlap
+            # create random patches over all image (using patchify)  | step=path_size means no overlap of images
             all_patches_img = patchify(image, (patch_size, patch_size, 3), step=patch_size)
             all_patches_mask = patchify(mask, (patch_size, patch_size), step=patch_size)
             i = np.random.RandomState(self.seed_count).choice(range(all_patches_img.shape[0]), n_patches)
