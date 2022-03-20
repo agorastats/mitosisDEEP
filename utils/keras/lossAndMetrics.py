@@ -14,7 +14,7 @@ def dice_coef(y_true, y_pred):
     return (2. * intersection + K.epsilon()) / (K.sum(y_true_f) + K.sum(y_pred_f) + K.epsilon())
 
 
-def dice_loss2(y_true, y_pred):
+def old_dice_loss(y_true, y_pred):
     numerator = 2 * tf.reduce_sum(y_true * y_pred, axis=(1, 2, 3))
     denominator = tf.reduce_sum(y_true + y_pred, axis=(1, 2, 3))
     return 1 - numerator / denominator
