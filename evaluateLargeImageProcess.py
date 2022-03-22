@@ -45,6 +45,8 @@ class EvaluateLargeImageProcess(Runnable):
         self.stain_norm.fit(img)
 
     def apply_stain_normalization(self, img):
+        if img.max() <= 1.0:
+            img = img * 255.
         img = self.stain_norm.transform(img)
         return img
 
