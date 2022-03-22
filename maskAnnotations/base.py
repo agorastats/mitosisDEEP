@@ -1,11 +1,24 @@
 import logging
 import os
+import cv2
+import numpy as np
 
 from abc import ABCMeta, abstractmethod
 from utils.image import create_dir
 from utils.runnable import Runnable
 
 DEF_MASK_OUTPUT_FOLDER = 'masks'
+
+
+def get_annotations_by_zscore(img, thresh=4.5):
+    mean = np.mean(img, axis=(0, 1))
+    std = np.std(img, axis=(0, 1))
+    mask = (np.abs(img - mean) / std >= thresh).any(axis=2)
+    mask_u8 = mask.astype(np.uint8)
+    contours, _ = cv2.findContours(mask_u8, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    # keep center of contours with minimum shape
+    annot_list = [c.mean(axis=0).astype(int).tolist()[0] for c in contours if c.shape[0] > 40]
+    return annot_list
 
 
 class CreateMaskAnnotations(Runnable, metaclass=ABCMeta):
