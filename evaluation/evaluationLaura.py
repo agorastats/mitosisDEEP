@@ -29,6 +29,9 @@ class EvaluationMasksLaura(EvaluationMasksUOC):
 
 if __name__ == '__main__':
     argv = sys.argv[1:]
-    argv += ['--infoCsv', 'pred_proves_dataset20220207_unet_bce_dice_loss_stain.csv']
+    argv += ['--infoCsv',
+             'pred_info_all_data_2022_03_20_unet.csv',
+             '--output',
+             'all_data_2022_03_20_unet']
 
     Main(EvaluationMasksLaura()).run(argv)

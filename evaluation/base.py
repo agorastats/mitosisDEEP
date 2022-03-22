@@ -20,6 +20,7 @@ def get_dice_coef(mask1, mask2):
 
 
 INFO_CSV_KEY = 'info_csv'
+OUTPUT_PATH_KEY = 'outputPath'
 
 
 class EvaluationMasks(Runnable, metaclass=ABCMeta):
@@ -30,23 +31,28 @@ class EvaluationMasks(Runnable, metaclass=ABCMeta):
         self.mask_path = None
         self.pred_info = None
         self.images_list = None
-        self.suffix_annot = ''
         self.output_path = None
+        self.suffix_annot = ''
 
     def add_options(self, parser):
         super().add_options(parser)
         parser.add_option('--infoCsv', dest=INFO_CSV_KEY,
                           help='Folder containing rle encode prediction masks info (csv format)',
                           action='store', default=None)
+        parser.add_option('--output', dest=OUTPUT_PATH_KEY,
+                          help='Folder to output annotation images with mask predictions',
+                          action='store', default=None)
 
     def create_needed_folders(self, options):
         info_csv = options[INFO_CSV_KEY]
         info_csv_name = info_csv.split('.')[0]
-        self.output_path = os.path.join(self.data_path, info_csv_name) if self.output_path is None else self.output_path
+        self.output_path = os.path.join(self.data_path, info_csv_name) if options[OUTPUT_PATH_KEY] is None \
+            else os.path.join(self.data_path, options[OUTPUT_PATH_KEY])
         create_dir(self.output_path)
 
     def get_pred_info(self, options):
         infoDF = read_data_frame(os.path.join(self.data_path, options[INFO_CSV_KEY]))
+        assert not infoDF.empty, 'infoDF of predictions are empty!'
         infoDF.loc[:, 'rle'].fillna('', inplace=True)
         return infoDF
 
