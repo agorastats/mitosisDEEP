@@ -50,12 +50,15 @@ class EvaluateLargeImageProcess(Runnable):
 
     def apply_preprocess(self, img, stain):
         img = img.astype('float32')
+
         if stain:
             img = self.apply_stain_normalization(img)
-        if self.preprocess is None:
-            img = img / 255.
-        else:
-            img = self.preprocess(img)
+
+        if img.max() > 1.0:
+            if self.preprocess is None:
+                img = img / 255.
+            else:
+                img = self.preprocess(img)
         return img
 
     def predict_using_patchify(self, img, stain):
