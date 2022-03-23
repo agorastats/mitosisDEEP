@@ -27,6 +27,7 @@ class EvaluationMasksLaura(EvaluationMasksUOC):
         self.suffix_annot = 'a'
         # self.output_path = None
 
+
 if __name__ == '__main__':
     argv = sys.argv[1:]
     argv += ['--infoCsv',

@@ -1,13 +1,18 @@
 import logging
 import os
-
-from abc import ABCMeta, abstractmethod
-
+import cv2
 import numpy as np
+import pandas as pd
 
+from abc import ABCMeta
 from utils.image import create_dir
 from utils.loadAndSaveResults import read_data_frame
 from utils.runnable import Runnable
+
+# ICPR12: A segmented mitosis would be counted as correctly detected if its centroid
+# is localised within a range of 8 μm from the centroid of a ground truth mitosis.
+# aprox 0.25um per pixel in images ICPR12, so aprox. 8/0.25 as tolerance
+TOLERANCE_PIXEL_ERROR = 30
 
 
 def get_dice_coef(mask1, mask2):
@@ -17,6 +22,29 @@ def get_dice_coef(mask1, mask2):
     dice = (2 * intersect) / (fsum + ssum)
     dice = np.mean(dice).round(3)
     return dice
+
+
+def get_centroids_of_mask(mask, min_shape=0):
+    mask_u8 = mask.astype(np.uint8)
+    contours, _ = cv2.findContours(mask_u8, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    centroidDF = pd.DataFrame([c.mean(axis=0).astype(int).tolist()[0] for c in contours if c.shape[0] >= min_shape])
+    return centroidDF
+
+
+def compare_centroids_of_masks(mask, pred_mask, tol=TOLERANCE_PIXEL_ERROR):
+    obsDF = get_centroids_of_mask(mask)
+    predDF = get_centroids_of_mask(pred_mask)
+    # compare it
+    match = 0
+    for i, row in predDF.iterrows():
+        if obsDF.empty:
+            return match
+        match_cond = (np.abs(row - obsDF) <= tol).all(axis=1)
+        if match_cond.any():
+            # drop and count match
+            obsDF = obsDF.loc[~match_cond, :]
+            match += 1
+    return match
 
 
 INFO_CSV_KEY = 'info_csv'

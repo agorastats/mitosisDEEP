@@ -12,31 +12,26 @@ from utils.loadAndSaveResults import read_data_frame, store_data_frame
 from utils.image import trace_boundingBox, rle_decode, create_dir, read_mask
 from utils.runnable import Main
 
-DATA_PATH = 'data/icpr12/validation_data/icpr12_evaluation'
-MASK_PATH = 'data/icpr12/validation_data/icpr12_evaluation/masks'
+DATA_PATH = 'data/Paula'
+MASK_PATH = 'data/Paula/masks'
 
 
-class EvaluationICPR12(EvaluationMasksUOC):
+class EvaluationMasksPaula(EvaluationMasksUOC):
 
     def __init__(self):
         super().__init__()
         self.data_path = DATA_PATH
         self.mask_path = MASK_PATH
-        self.suffix_annot = ''
+        self.suffix_annot = 'x'
         # self.output_path = None
-
-    def get_pred_info(self, options):
-        infoDF = super().get_pred_info(options)
-        # annotations have same name but different extension, change it
-        infoDF.loc[:, 'id'] = infoDF.loc[:, 'id'].str.replace('bmp', 'jpg')
-        return infoDF
 
 
 if __name__ == '__main__':
+    # todo: a determinar
     argv = sys.argv[1:]
     argv += ['--infoCsv',
-             'icpr12_eval_pred_info.csv',
+             'pred_info_all_data_2022_03_20_unet.csv',
              '--output',
              'all_data_2022_03_20_unet']
 
-    Main(EvaluationICPR12()).run(argv)
+    Main(EvaluationMasksPaula()).run(argv)
