@@ -15,7 +15,7 @@ def early_stop(monitor='val_loss', patience=10):
     return tf.keras.callbacks.EarlyStopping(monitor=monitor, patience=patience)
 
 
-def reduce_lr(monitor='val_loss', factor=0.2, patience=5, min_lr=0.0000001, verbose=1):
+def reduce_lr(monitor='val_loss', factor=0.2, patience=4, min_lr=0.0000001, verbose=1):
     # reduce learning rate by factor if not improve monitor in patience epochs
     return tf.keras.callbacks.ReduceLROnPlateau(monitor=monitor, factor=factor,
                                                 patience=patience, min_lr=min_lr, verbose=verbose)
