@@ -35,8 +35,8 @@ class EvaluationICPR12(EvaluationMasksUOC):
 if __name__ == '__main__':
     argv = sys.argv[1:]
     argv += ['--infoCsv',
-             'icpr12_eval_pred_info.csv',
+             'all_data_resnet_pred_info_icpr12.csv',
              '--output',
-             'all_data_2022_03_20_unet']
+             'all_data_resnet_pred_info_icpr12']
 
     Main(EvaluationICPR12()).run(argv)

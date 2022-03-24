@@ -27,11 +27,10 @@ class EvaluationMasksPaula(EvaluationMasksUOC):
 
 
 if __name__ == '__main__':
-    # todo: a determinar
     argv = sys.argv[1:]
     argv += ['--infoCsv',
-             'pred_info_all_data_2022_03_20_unet.csv',
+             'all_data_resnet_pred_info_paula.csv',
              '--output',
-             'all_data_2022_03_20_unet']
+             'all_data_resnet_pred_info_paula']
 
     Main(EvaluationMasksPaula()).run(argv)

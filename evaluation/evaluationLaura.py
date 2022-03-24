@@ -31,8 +31,8 @@ class EvaluationMasksLaura(EvaluationMasksUOC):
 if __name__ == '__main__':
     argv = sys.argv[1:]
     argv += ['--infoCsv',
-             'pred_info_all_data_2022_03_20_unet.csv',
+             'all_data_resnet_pred_info_laura.csv',
              '--output',
-             'all_data_2022_03_20_unet']
+             'all_data_resnet_pred_info_laura']
 
     Main(EvaluationMasksLaura()).run(argv)

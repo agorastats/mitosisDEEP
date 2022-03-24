@@ -71,8 +71,8 @@ if __name__ == '__main__':
     #          'pred_proves_dataset20220207_unet_bce_dice_loss_stain']
 
     argv += ['--infoCsv',
-             'pred_info_all_data_2022_03_20_unet.csv',
+             'all_data_resnet_pred_info_uoc.csv',
              '--output',
-             'pred_info_all_data_2022_03_20_unet']
+             'all_data_res_net_pred_info_uoc']
 
     Main(EvaluationMasksUOC()).run(argv)
