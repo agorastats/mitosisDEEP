@@ -1,5 +1,7 @@
 import logging
 import os
+import time
+
 import cv2
 import numpy as np
 import pandas as pd
@@ -103,6 +105,7 @@ class EvaluateLargeImageProcess(Runnable):
     def run(self, options):
         infoDFList = list()
         for i, f in enumerate(self.df.loc[:, 'id']):
+            init_time = time.time()
             logging.info('predict image: %s' % str(f))
             img = read_image(os.path.join(self.img_path, f))
             for stain in self.stain:
@@ -110,6 +113,7 @@ class EvaluateLargeImageProcess(Runnable):
                 values_dict = {'id': f, 'stain': stain, 'size_x': size_x, 'size_y': size_y, 'rle': rle_encode(pred_img)}
                 auxDF = pd.DataFrame(values_dict, index=[0])
                 infoDFList.append(auxDF)
+            logging.info('__total time for prediction: ' + str(round(time.time() - init_time, 2)) + ' seconds')
 
         infoDF = pd.concat(infoDFList, ignore_index=True)
         store_data_frame(infoDF, os.path.join(self.output_info, 'pred_info.csv'))
