@@ -36,6 +36,10 @@ class CreateMaskAnnotations(Runnable, metaclass=ABCMeta):
     def get_annotations(self, *args):
         pass
 
+    @abstractmethod
+    def create_mask_with_annotations(self, *args):
+        pass
+
     def pre_run(self, options):
         self.create_needed_folders(options)
         logging.info('iterating process: %s' % self.__class__.__name__)
