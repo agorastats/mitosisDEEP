@@ -10,22 +10,26 @@ from utils.loadAndSaveResults import store_data_frame
 from utils.runnable import Runnable
 from utils.stain.preprocessStain import Normalizer
 
-
 STAIN_REF_IMG = 'utils/stain/he_ref/A00_01_ref_img.bmp'
 
 
 class EvaluateLargeImageProcess(Runnable):
-    def __init__(self, df=None, patchify_size=256, img_path=None, mask_path=None, preprocess=None,
+    def __init__(self, df=None, patchify_size=256, overlap_patches=1, img_path=None, mask_path=None,
+                 preprocess=None,
                  model=None, stain=False, stain_ref_img=None, output_info=None):
         super().__init__()
         assert img_path is not None, 'need to fill img_path!'
         assert df is not None, 'need to fill df with images info!'
+        assert (patchify_size % overlap_patches) == 0, 'problems with patch size and overlap. Patch size / ' \
+                                                       'overlap must module must be 0! '
         assert 'id' in df.columns, 'need to fill id column with images info in df'
         assert model is not None
         assert output_info is not None
 
         self.df = df
         self.patchify_size = patchify_size
+        self.overlap_patches = overlap_patches
+        self.patchify_step = int(self.patchify_size / self.overlap_patches)
         self.img_path = img_path
         self.mask_path = mask_path
         self.preprocess = preprocess
@@ -66,7 +70,7 @@ class EvaluateLargeImageProcess(Runnable):
     def predict_using_patchify(self, img, stain):
         # step same as patch for not overlap patches
         img = self.apply_preprocess(img, stain)
-        patches = patchify(img, (self.patchify_size, self.patchify_size, 3), step=self.patchify_size)
+        patches = patchify(img, (self.patchify_size, self.patchify_size, 3), step=self.patchify_step)
         patches = patches[:, :, 0, :, :, :]
         predicted_patches = []
         logging.info('____predict patches')
@@ -109,4 +113,3 @@ class EvaluateLargeImageProcess(Runnable):
 
         infoDF = pd.concat(infoDFList, ignore_index=True)
         store_data_frame(infoDF, os.path.join(self.output_info, 'pred_info.csv'))
-
