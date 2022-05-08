@@ -29,13 +29,17 @@ class CreateMaskAnnotationsUOC(CreateMaskAnnotations):
         annot_list = [c.mean(axis=0).astype(int).tolist()[0] for c in contours if c.shape[0] > 40]
         return annot_list
 
+    def create_mask_with_annotations(self, image, annot_list):
+        mask = create_mask_with_annotations_circle(image, annot_list)
+        return mask
+
     def run(self, options):
         for image in self.images_list:
             logging.info('__annotation image: %s' % str(image))
             img = cv2.imread(os.path.join(self.data_path, image))
             if img is not None:
                 annot_list = self.get_annotations(img)
-                mask = create_mask_with_annotations_circle(img, annot_list)
+                mask = self.create_mask_with_annotations(img, annot_list)
                 # show_image(img, mask)
                 cv2.imwrite(os.path.join(self.data_path, self.mask_output, image), mask)
 

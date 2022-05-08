@@ -39,6 +39,9 @@ class CreateMaskAnnotationsICPR12Eval(CreateMaskAnnotations):
                 raise Warning("Line %d in %s has invalid value." % (ln, path))
         return result
 
+    def create_mask_with_annotations(self, image, annot_list):
+        mask = create_mask_with_annotations_polynomial(image, annot_list)
+        return mask
 
     def run(self, options):
         for folder in self.folders_name:
@@ -53,7 +56,7 @@ class CreateMaskAnnotationsICPR12Eval(CreateMaskAnnotations):
                 name_img = img.split('.')[0]
                 image = cv2.imread(os.path.join(data_dir, img))
                 annot_list = self.get_annotations(os.path.join(annot_dir, name_img + '.csv'))
-                mask = create_mask_with_annotations_polynomial(image, annot_list)
+                mask = self.create_mask_with_annotations(image, annot_list)
                 assert len(np.unique(mask)) <= 2, 'more than 2 color pixels'
                 # save mask as jpg
                 cv2.imwrite(os.path.join(self.data_path, self.mask_output, img.replace('.bmp', '.jpg')), mask)
