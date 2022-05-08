@@ -15,7 +15,6 @@ class CreateMaskAnnotationsLaura(CreateMaskAnnotationsUOC):
         super().__init__()
         self.data_path = mitosis_path
         self.images_list = mitosis_images
-        self.mask_output = 'masks_prova'
 
     def get_annotations(self, img):
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
