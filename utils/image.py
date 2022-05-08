@@ -1,4 +1,5 @@
 import glob
+import logging
 import os
 import cv2
 import numpy as np
@@ -71,9 +72,10 @@ def reduce_size_of_image_and_save_it(filename, outputDir):
     img.save(outputDir + filename, format='jpeg', quality=10, optimize=True)
 
 
-def create_dir(output_dir):
-    if not path.exists(output_dir):
-        makedirs(output_dir)
+def create_dir(dir_path):
+    if not path.exists(dir_path):
+        logging.info('__create new folder: %s' % dir_path)
+        makedirs(dir_path)
 
 
 def create_mask_with_annotations_polynomial(image, annotations_list):

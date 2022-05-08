@@ -11,7 +11,7 @@ from utils.runnable import Runnable
 from utils.stain.preprocessStain import Normalizer
 
 
-STAIN_REF_IMG = 'utils/stain/A00_01_ref_img.bmp'
+STAIN_REF_IMG = 'utils/stain/he_ref/A00_01_ref_img.bmp'
 
 
 class EvaluateLargeImageProcess(Runnable):

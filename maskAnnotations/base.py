@@ -34,7 +34,6 @@ class CreateMaskAnnotations(Runnable, metaclass=ABCMeta):
 
     @abstractmethod
     def get_annotations(self, *args):
-        # ref to convert hsv: https://toolstud.io/color/rgb.php?
         pass
 
     def pre_run(self, options):
