@@ -6,12 +6,13 @@ from keras.losses import binary_crossentropy
 # ref: https://github.com/nauyan/Segmentation/blob/master/Code/utils/metricfunctions.py
 # ref: dice coefficient: https://www.kaggle.com/yerramvarun/understanding-dice-coefficient
 
-
-def dice_coef(y_true, y_pred):
+# The smooth variable is used to help with backpropagation by not getting the term close to zero  \
+# as well as preventing overfitting with a relatively large value.
+def dice_coef(y_true, y_pred, smooth=1.):
     y_true_f = K.flatten(y_true)
     y_pred_f = K.flatten(y_pred)
     intersection = K.sum(y_true_f * y_pred_f)
-    return (2. * intersection + K.epsilon()) / (K.sum(y_true_f) + K.sum(y_pred_f) + K.epsilon())
+    return (2. * intersection + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
 
 
 def old_dice_loss(y_true, y_pred):

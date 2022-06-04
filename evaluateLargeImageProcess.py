@@ -12,7 +12,7 @@ from utils.loadAndSaveResults import store_data_frame
 from utils.runnable import Runnable
 from utils.stain.preprocessStain import Normalizer
 
-STAIN_REF_IMG = 'utils/stain/he_ref/A00_01_ref_img.bmp'
+DEFAULT_STAIN_REF_IMG = 'utils/stain/he_ref/A00_01_ref_img.bmp'
 
 
 class EvaluateLargeImageProcess(Runnable):
@@ -22,8 +22,8 @@ class EvaluateLargeImageProcess(Runnable):
         super().__init__()
         assert img_path is not None, 'need to fill img_path!'
         assert df is not None, 'need to fill df with images info!'
-        assert (patchify_size % overlap_patches) == 0, 'problems with patch size and overlap. Patch size / ' \
-                                                       'overlap must module must be 0! '
+        assert (patchify_size % overlap_patches) == 0, 'problems with patchify size and overlap on patches. ' \
+                                                       'Patch size / overlap module must be 0! '
         assert 'id' in df.columns, 'need to fill id column with images info in df'
         assert model is not None
         assert output_info is not None
@@ -43,7 +43,7 @@ class EvaluateLargeImageProcess(Runnable):
         self.stain_norm = None
         self.stain = [False] if stain is False else [False, True]
         if any(self.stain):
-            self.init_stain_norm(STAIN_REF_IMG if stain_ref_img is None else stain_ref_img)
+            self.init_stain_norm(DEFAULT_STAIN_REF_IMG if stain_ref_img is None else stain_ref_img)
 
     def init_stain_norm(self, img):
         img = read_image(img)
@@ -51,28 +51,26 @@ class EvaluateLargeImageProcess(Runnable):
         self.stain_norm.fit(img)
 
     def apply_stain_normalization(self, img):
-        if img.max() <= 1.0:
-            img = img * 255.
         img = self.stain_norm.transform(img)
         return img
 
     def apply_preprocess(self, img, stain):
-        img = img.astype('float32')
+        img_preproc = img.copy()
+        img_preproc = img_preproc.astype('float32')
 
         if stain:
-            img = self.apply_stain_normalization(img)
+            img_preproc = self.apply_stain_normalization(img_preproc)
 
-        if img.max() > 1.0:
-            if self.preprocess is None:
-                img = img / 255.
-            else:
-                img = self.preprocess(img)
-        return img
+        if self.preprocess is None:
+            img_preproc = img_preproc / 255.
+        else:
+            img_preproc = self.preprocess(img_preproc)
+        return img_preproc
 
     def predict_using_patchify(self, img, stain):
         # step same as patch for not overlap patches
-        img = self.apply_preprocess(img, stain)
-        patches = patchify(img, (self.patchify_size, self.patchify_size, 3), step=self.patchify_step)
+        img_preproc = self.apply_preprocess(img, stain)
+        patches = patchify(img_preproc, (self.patchify_size, self.patchify_size, 3), step=self.patchify_step)
         patches = patches[:, :, 0, :, :, :]
         predicted_patches = []
         logging.info('____predict patches')
@@ -87,7 +85,7 @@ class EvaluateLargeImageProcess(Runnable):
                                                 [patches.shape[0], patches.shape[1], patches.shape[2],
                                                  patches.shape[3]])
         logging.info('____reconstruct image with patches')
-        reconstructed_image = unpatchify(predicted_patches_reshaped, (img.shape[0], img.shape[1]))
+        reconstructed_image = unpatchify(predicted_patches_reshaped, (img_preproc.shape[0], img_preproc.shape[1]))
         return reconstructed_image
 
     def predict_image(self, img, stain=False):
