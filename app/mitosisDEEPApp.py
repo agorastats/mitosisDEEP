@@ -33,7 +33,7 @@ VERSION_APP = 0.1
 
 temp_dir = str(uuid.uuid1())
 create_dir(temp_dir)
-ACCEPT_IMAGE_FORMAT = ['jpg', 'jpeg', 'bmp', 'tiff']
+ACCEPT_IMAGE_FORMAT = ['jpg', 'jpeg', 'bmp', 'tiff', 'png']
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css', dbc.themes.LUMEN]
 app = dash.Dash(external_stylesheets=external_stylesheets)
