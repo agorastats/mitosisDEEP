@@ -1,7 +1,9 @@
 import glob
+import io
 import logging
 import os
 import cv2
+import base64
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -73,12 +75,18 @@ def reduce_size_of_image_and_save_it(filename, outputDir):
 
 
 def create_dir(dir_path):
+    '''
+        Create directory if not exists
+    '''
     if not path.exists(dir_path):
         logging.info('__create new folder: %s' % dir_path)
         makedirs(dir_path)
 
 
 def create_mask_with_annotations_polynomial(image, annotations_list):
+    '''
+    Generate mask with multiple annotations
+    '''
     mask_image = np.zeros_like(image)
     for m in range(len(annotations_list)):
         mask_image = cv2.fillPoly(mask_image, pts=[np.array(annotations_list[m])], color=(255, 255, 255))
@@ -88,6 +96,9 @@ def create_mask_with_annotations_polynomial(image, annotations_list):
 
 
 def create_mask_with_annotations_circle(image, annotations_list, radius=15):
+    '''
+    Generate mask with annotations as circles (1 annotation, for ex: centroid of interest object
+    '''
     mask_image = np.zeros_like(image)
     for m in range(len(annotations_list)):
         mask_image = cv2.circle(mask_image, tuple(annotations_list[m]), radius, color=(255, 255, 255), thickness=-1)
@@ -96,6 +107,9 @@ def create_mask_with_annotations_circle(image, annotations_list, radius=15):
 
 
 def generate_patch(image, height, width, centered, patch_size=256):
+    '''
+    Generate patches given some image
+    '''
     patch_center = np.array([height, width])
     limit_image = image.shape
     # center patch if possible, else contains patch that starts at border of image
@@ -109,6 +123,9 @@ def generate_patch(image, height, width, centered, patch_size=256):
 
 
 def show_image(*args):
+    '''
+    Plot all images elements of input
+    '''
     if len(args) == 1:
         plt.imshow(args[0])
     else:
@@ -151,7 +168,6 @@ def rle_decode(mask_rle, shape):
     mask_rle: run-length as string formated (start length)
     shape: (height,width) of array to return
     Returns numpy array, 1 - mask, 0 - background
-
     '''
     s = mask_rle.split()
     starts, lengths = [np.asarray(x, dtype=int) for x in (s[0:][::2], s[1:][::2])]
@@ -166,7 +182,7 @@ def rle_decode(mask_rle, shape):
 def maskInColor(image: np.ndarray,
                 mask: np.ndarray,
                 color: tuple = (0, 0, 255),
-                alpha: float = 0.2) -> np.ndarray:
+                alpha: float = 0.2):
     image = np.array(image)
     H, W, C = image.shape
     mask = mask.reshape(H, W, 1)
@@ -200,3 +216,10 @@ def trace_boundingBox(image: np.ndarray,
         coin2 = (prop.bbox[1], prop.bbox[0])
         cv2.rectangle(image, coin2, coin1, color, width)
     return image
+
+
+def array_to_b64(img, ext="jpeg"):
+    buffer = io.BytesIO()
+    Image.fromarray(img).save(buffer, format=ext)
+    encoded = base64.b64encode(buffer.getvalue()).decode("utf-8")
+    return f"data:image/{ext};base64, {encoded}"
