@@ -4,3 +4,5 @@ icpr12_data
 data
 patches
 utils/stain/he_ref
+app/weights/*
+app/temp/*

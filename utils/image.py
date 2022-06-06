@@ -195,8 +195,9 @@ def maskInColor(image: np.ndarray,
 
 def trace_boundingBox(image: np.ndarray,
                       mask: np.ndarray,
-                      color: tuple = (0, 0, 255),
-                      width: int = 10):
+                      color: tuple = (255, 0, 0),  # red on rgb
+                      width: int = 10,
+                      expand_box_px: int = 30):
     """
     Draw a bounding box on image
 
@@ -206,14 +207,18 @@ def trace_boundingBox(image: np.ndarray,
      mask  : mask to process
      color : color we want to use to draw the box edges
      width : box edges's width
+     expand_box_px: expand some pixels on bounding box
 
     """
 
     lbl = label(mask)
     props = regionprops(lbl)
     for prop in props:
-        coin1 = (prop.bbox[3], prop.bbox[2])
-        coin2 = (prop.bbox[1], prop.bbox[0])
+        #** bbox **: tuple, Bounding box ``(min_row, min_col, max_row, max_col)``
+        coin1 = (min(image.shape[1], prop.bbox[3] + expand_box_px), min(image.shape[0], prop.bbox[2] + expand_box_px))
+        coin2 = (max(0, prop.bbox[1] - expand_box_px), max(0, prop.bbox[0] - expand_box_px))
+        # coin1 = (prop.bbox[3], prop.bbox[2])
+        # coin2 = (prop.bbox[1], prop.bbox[0])
         cv2.rectangle(image, coin2, coin1, color, width)
     return image
 
