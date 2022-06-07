@@ -19,9 +19,9 @@ class EvaluationMasksLauraPaula(EvaluationMasksUOC):
 if __name__ == '__main__':
     argv = sys.argv[1:]
     argv += ['--infoCsv',
-             'all_data_he_norm_pred_info.csv',
+             'lauraPaula_pred_info_proves_amb_midog_unet_2022_05_05.csv',
              #'laura_paula_mitosis_only_midog_pred_info.csv',
              '--output',
-             'all_data_he_norm_pred_info']
+             'lauraPaula_pred_info_proves_amb_midog_unet_2022_05_05']
 
     Main(EvaluationMasksLauraPaula()).run(argv)

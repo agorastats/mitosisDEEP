@@ -8,6 +8,7 @@ from abc import ABCMeta
 from utils.image import create_dir
 from utils.loadAndSaveResults import read_data_frame
 from utils.runnable import Runnable
+from keras import backend as K
 
 # ICPR12: A segmented mitosis would be counted as correctly detected if its centroid
 # is localised within a range of 8 μm from the centroid of a ground truth mitosis.
@@ -19,9 +20,18 @@ def get_dice_coef(mask1, mask2):
     intersect = np.sum(mask1 * mask2)
     fsum = np.sum(mask1)
     ssum = np.sum(mask2)
-    dice = (2 * intersect) / (fsum + ssum)
+    dice = (2 * intersect + 1) / (fsum + ssum + 1)
     dice = np.mean(dice).round(3)
     return dice
+
+def get_recall(y_true, y_pred):
+    '''Calculates the recall, a metric for multi-label classification of
+    how many relevant items are selected.
+    '''
+    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+    possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
+    recall = true_positives / (possible_positives + K.epsilon())
+    return recall
 
 
 def get_centroids_of_mask(mask, min_shape=0):

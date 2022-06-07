@@ -13,7 +13,7 @@ from utils.image import trace_boundingBox, rle_decode, create_dir, read_mask
 from utils.runnable import Main
 
 DATA_PATH = 'data/icpr12/validation_data/icpr12_evaluation'
-MASK_PATH = 'data/icpr12/validation_data/icpr12_evaluation/masks'
+MASK_PATH = 'data/icpr12/validation_data/icpr12_evaluation/masks_centroid' # eval with centroids and not shape masks
 
 
 class EvaluationICPR12(EvaluationMasksUOC):
@@ -35,8 +35,8 @@ class EvaluationICPR12(EvaluationMasksUOC):
 if __name__ == '__main__':
     argv = sys.argv[1:]
     argv += ['--infoCsv',
-             'all_data_resnet_pred_info_icpr12.csv',
+             'icpr12_pred_info_all_data_2022_03_20_resnet.csv',
              '--output',
-             'all_data_resnet_pred_info_icpr12']
+             'icpr12_pred_info_all_data_2022_03_20_resnet']
 
     Main(EvaluationICPR12()).run(argv)
