@@ -29,6 +29,16 @@ def bce_dice_loss(y_true, y_pred):
     return binary_crossentropy(y_true, y_pred) + dice_loss(y_true, y_pred)
 
 
+def focal_loss(y_true, y_pred, alpha=0.25, gamma=2):
+    inputs = K.flatten(y_pred)
+    targets = K.flatten(y_true)
+
+    BCE = K.binary_crossentropy(targets, inputs)
+    BCE_EXP = K.exp(-BCE)
+    focal_loss = K.mean(alpha * K.pow((1 - BCE_EXP), gamma) * BCE)
+    return focal_loss
+
+
 def jaccard_loss(y_true, y_pred, smooth=100):
     """
     Jaccard = (|X & Y|)/ (|X|+ |Y| - |X & Y|)
