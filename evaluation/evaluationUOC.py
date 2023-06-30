@@ -74,7 +74,16 @@ class EvaluationMasksUOC(EvaluationMasks):
             dice_coef_df_list.append(dice_coef_df)
         dice_coef_df = pd.concat(dice_coef_df_list, ignore_index=True)
         dice_coef_df.rename(columns={'index': 'image', 0: 'dice_coef'}, inplace=True)
+
+        # metrica definitiva
+        dice_coef_df.loc[:, 'recall_bo'] = dice_coef_df.loc[:, 'similar_centroid'] / dice_coef_df.loc[:, 'obs_mitotic']
+        dice_coef_df.loc[:, 'prec_bo'] = dice_coef_df.loc[:, 'similar_centroid'] / dice_coef_df.loc[:, 'pred_mitotic_min_shape']
+        dice_coef_df.loc[:, 'fscore'] = (2 * dice_coef_df.loc[:, 'recall_bo'] * dice_coef_df.loc[:, 'prec_bo']) / (
+                    dice_coef_df.loc[:, 'recall_bo'] + dice_coef_df.loc[:, 'prec_bo'])
+
+
         store_data_frame(dice_coef_df, os.path.join(self.output_path, options[OUTPUT_PATH_KEY] + '_dice_coef.csv'))
+
 
 
 if __name__ == '__main__':
@@ -86,8 +95,8 @@ if __name__ == '__main__':
     #          'pred_proves_dataset20220207_unet_bce_dice_loss_stain']
 
     argv += ['--infoCsv',
-             'pred_proves_dataset20220207_resnet_bce_dice_loss_more_train.csv',
+             'uoc_all_data_2022_03_20_unet_custom_loss_gamma3.csv',
              '--output',
-             'pred_proves_dataset20220207_resnet_bce_dice_loss_more_train2']
+             'uoc_all_data_2022_03_20_unet_custom_loss_gamma3']
 
     Main(EvaluationMasksUOC()).run(argv)

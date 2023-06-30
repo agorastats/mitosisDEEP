@@ -34,7 +34,7 @@ from utils.runnable import Main
 VERSION_APP = 0.1
 WEIGHTS_PATH = 'weights/proves_all_data_he_norm_backbone.h5'
 ACCEPT_IMAGE_FORMAT = ['jpg', 'jpeg', 'bmp', 'tiff', 'png']
-
+EXAMPLE_IMG_PATH = 'app/assets/example1_060.jpg'
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css', dbc.themes.LUMEN]
 
 
@@ -62,6 +62,30 @@ class RunMitosisDeepApp(EvaluateLargeImageProcess):
                  output_info=output_info):
         super().__init__(df, patchify_size, overlap_patches, img_path, mask_path, preprocess, model, stain,
                          stain_ref_img, output_info)
+        self.example_click = 0
+
+    def predict_and_return_image_card(self, contents, filename):
+        if contents is None and filename != EXAMPLE_IMG_PATH:
+            return
+        extension = filename.split('.')[-1]
+        if extension not in ACCEPT_IMAGE_FORMAT:
+            return image_card('empty',
+                              header='Error upload image. \
+                               Only accept images and with extensions: {}'.format(
+                                  [accept for accept in ACCEPT_IMAGE_FORMAT]))
+        if filename != EXAMPLE_IMG_PATH:
+            encoded = np.frombuffer(base64.b64decode(contents.split(',')[1]), np.uint8)
+            img = cv2.imdecode(encoded, cv2.IMREAD_COLOR)
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # necessary for nets
+        else:
+            img = read_image(filename)
+        pred_img, size_x, size_y = self.predict_image(img, stain=False)
+        img = cv2.resize(img, (size_x, size_y))
+        # todo: predict with model
+        if (pred_img > 0).any():
+            img = trace_boundingBox(img, pred_img, color=(0, 0, 0), width=2)
+        str_img = array_to_b64(img, ext="jpeg")
+        return image_card(str_img, header='prediction for filename: {}'.format(filename))
 
     def build_structure_of_app(self, app):
         # define structure of app
@@ -114,6 +138,10 @@ class RunMitosisDeepApp(EvaluateLargeImageProcess):
             html.Button("Save Image to temp directory: {}".format(self.output_info),
                         id="btn_image", style={'fontSize': '20px'}),
             dcc.Download(id="download-image"),
+            dbc.Col([html.Button('Click here to use example', id='example1', style={'fontSize': '20px'}),
+            html.Img(id='example1-img', src=app.get_asset_url('example1_060.jpg'),
+                             style={'height': '10%', 'width': '10%', 'align': 'left',
+                                    'border': '4px black solid'})]),
             html.Br(),
             dbc.Col(html.Div(id='output-image-pred'), align='center')
 
@@ -125,27 +153,14 @@ class RunMitosisDeepApp(EvaluateLargeImageProcess):
 
         @app.callback(Output('output-image-pred', 'children'),
                       Input('upload-image', 'contents'),
+                      Input('example1', 'n_clicks'),
                       State('upload-image', 'filename'),
                       prevent_initial_call=True)
-        def prediction(contents, filename):
-            if contents is None:
-                return
-            extension = filename.split('.')[-1]
-            if extension not in ACCEPT_IMAGE_FORMAT:
-                return image_card('empty',
-                                  header='Error upload image. \
-                                   Only accept images and with extensions: {}'.format(
-                                      [accept for accept in ACCEPT_IMAGE_FORMAT]))
-            encoded = np.frombuffer(base64.b64decode(contents.split(',')[1]), np.uint8)
-            img = cv2.imdecode(encoded, cv2.IMREAD_COLOR)
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # necessary for nets
-            pred_img, size_x, size_y = self.predict_image(img, stain=False)
-            img = cv2.resize(img, (size_x, size_y))
-            # todo: predict with model
-            if (pred_img > 0).any():
-                img = trace_boundingBox(img, pred_img, color=(0, 0, 0), width=2)
-            str_img = array_to_b64(img, ext="jpeg")
-            return image_card(str_img, header='prediction for filename: {}'.format(filename))
+        def prediction(contents, example_click, filename):
+            if isinstance(example_click, int) and example_click > self.example_click:
+                filename = EXAMPLE_IMG_PATH
+                self.example_click = example_click   # save value of example_click button
+            return self.predict_and_return_image_card(contents, filename)
 
         @app.callback(Output("download-image", "data"),
                       Input("btn_image", "n_clicks"),

@@ -43,7 +43,7 @@ def get_centroids_of_mask(mask, min_shape=0):
 
 def compare_centroids_of_masks(mask, pred_mask, tol=TOLERANCE_PIXEL_ERROR):
     obsDF = get_centroids_of_mask(mask)
-    predDF = get_centroids_of_mask(pred_mask)
+    predDF = get_centroids_of_mask(pred_mask, min_shape=15)  # not consider less than this shape
     # compare it
     match = 0
     for i, row in predDF.iterrows():
