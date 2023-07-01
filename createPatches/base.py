@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 import pandas as pd
 
+from sklearn.cluster import KMeans
 from patchify import patchify
 from abc import ABCMeta, abstractmethod
 from datetime import date, datetime
@@ -92,6 +93,25 @@ class CreatePatches(Runnable, metaclass=ABCMeta):
     def create_patches_with_annotations(self, image, mask, annotations, name_img, patch_size=256):
         pass
 
+    def apply_centroid_to_shape_mask(self, image, mask):
+        # kernel to erode image
+        kernel = np.ones((15, 15), np.uint8)
+        # apply kernel to image
+        erosion_img = cv2.erode(image, kernel, iterations=1)
+        # focus erosion_img only over mask pixels
+        masked_image = cv2.bitwise_and(erosion_img, erosion_img, mask=mask.astype(bool).astype(np.uint8))
+        # prepare data to fit cluster
+        eroded_image_flattened = masked_image.reshape((-1, 3))
+        kmeans = KMeans(n_clusters=2) # two groups, mitosis or not mitosis
+        kmeans.fit(eroded_image_flattened)
+        labels = kmeans.labels_
+        labelMito = np.bincount(labels).argmin()  # assume that mitosis group pixel count is < background pixel count
+        segmented_image = labels.reshape(masked_image.shape[:2])
+        # inference pixel-wise mask
+        shape_mask = np.zeros_like(mask, dtype=np.uint8)
+        shape_mask[segmented_image == labelMito] = 255
+        final_mask = shape_mask != mask  # inference mask pixels not in prior mask
+        return final_mask
     def pre_run(self, options):
         self.create_needed_folders(options)
         logging.info('iterating process: %s' % self.__class__.__name__)
