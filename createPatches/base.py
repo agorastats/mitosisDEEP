@@ -95,12 +95,14 @@ class CreatePatches(Runnable, metaclass=ABCMeta):
 
     def apply_centroid_to_shape_mask(self, image, mask):
         # kernel to erode image
-        kernel = np.ones((15, 15), np.uint8)
+        kernel = np.ones((3, 3), np.uint8)
         # apply kernel to image
-        erosion_img = cv2.erode(image, kernel, iterations=1)
+        # erosion_img = cv2.erode(image, kernel, iterations=1)
         # focus erosion_img only over mask pixels
+        erosion_img = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel, iterations=3)
+        erosion_img = cv2.morphologyEx(erosion_img, cv2.MORPH_CLOSE, kernel, iterations=3)
+        # prepare data to fit local cluster (in pixel-wise mask)
         masked_image = cv2.bitwise_and(erosion_img, erosion_img, mask=mask.astype(bool).astype(np.uint8))
-        # prepare data to fit cluster
         eroded_image_flattened = masked_image.reshape((-1, 3))
         kmeans = KMeans(n_clusters=2) # two groups, mitosis or not mitosis
         kmeans.fit(eroded_image_flattened)
@@ -111,7 +113,7 @@ class CreatePatches(Runnable, metaclass=ABCMeta):
         shape_mask = np.zeros_like(mask, dtype=np.uint8)
         shape_mask[segmented_image == labelMito] = 255
         final_mask = shape_mask != mask  # inference mask pixels not in prior mask
-        return final_mask
+        return final_mask.astype(np.uint8) * 255
     def pre_run(self, options):
         self.create_needed_folders(options)
         logging.info('iterating process: %s' % self.__class__.__name__)
