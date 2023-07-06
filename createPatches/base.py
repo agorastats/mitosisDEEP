@@ -114,6 +114,7 @@ class CreatePatches(Runnable, metaclass=ABCMeta):
         shape_mask[segmented_image == labelMito] = 255
         final_mask = shape_mask != mask  # inference mask pixels not in prior mask
         return final_mask.astype(np.uint8) * 255
+
     def pre_run(self, options):
         self.create_needed_folders(options)
         logging.info('iterating process: %s' % self.__class__.__name__)
