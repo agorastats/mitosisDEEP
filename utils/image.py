@@ -8,6 +8,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from os import makedirs, path
+
+import pandas as pd
 from PIL import Image
 from skimage.measure import label, regionprops
 
@@ -99,12 +101,122 @@ def create_mask_with_annotations_circle(image, annotations_list, radius=15):
     '''
     Generate mask with annotations as circles (1 annotation, for ex: centroid of interest object
     '''
+    mask_image = create_shape_mask_inferring_from_centroid_annotations(image, annotations_list)
     mask_image = np.zeros_like(image)
     for m in range(len(annotations_list)):
         mask_image = cv2.circle(mask_image, tuple(annotations_list[m]), radius, color=(255, 255, 255), thickness=-1)
     mask_image = cv2.cvtColor(mask_image, cv2.COLOR_BGR2GRAY)
     return mask_image
 
+def create_shape_mask_inferring_from_centroid_annotations(image, annotations_list):
+    '''
+    Generate mask inferring shapes using annotations (centroid) distribution colors (using small ROI)
+    '''
+    mask_image = np.zeros_like(image)
+
+    # approach using HSV
+    for m in range(len(annotations_list)):
+        x, y = annotations_list[m]
+        # small ROI to detect colors of mitosis
+        avg_colors_list = []
+        for region in [15, 30]:
+            start_x, start_y, end_x, end_y = get_correct_coords(image, x, y, region_size=region)
+            roi_around_centroid = image[start_y:end_y, start_x:end_x]
+            roi_around_centroid = cv2.cvtColor(roi_around_centroid, cv2.COLOR_BGR2HSV)
+            # smooth image using dilate and erode methods
+            kernel = np.ones((5, 5), np.uint8)
+            roi_around_centroid = cv2.dilate(roi_around_centroid, kernel, iterations=1)
+            roi_around_centroid = cv2.erode(roi_around_centroid, kernel, iterations=1)
+            h_channel = roi_around_centroid[:, :, 2]
+            # avg_colors_list.append(int(mode(h_channel.flatten()).mode))
+            avg_colors_list.append(np.quantile(h_channel, 0.1))
+
+        start_x, start_y, end_x, end_y = get_correct_coords(image, x, y, region_size=50)
+        roi_around_centroid = image[start_y:end_y, start_x:end_x]
+        roi_around_centroid = cv2.cvtColor(roi_around_centroid, cv2.COLOR_BGR2HSV)
+        kernel = np.ones((5, 5), np.uint8)
+        roi_around_centroid = cv2.dilate(roi_around_centroid, kernel, iterations=1)
+        roi_around_centroid = cv2.erode(roi_around_centroid, kernel, iterations=1)
+        tol = 15
+        h_channel = roi_around_centroid[:, :, 2]
+        # hist, bins = np.histogram(h_channel.flatten(), bins=256, range=[0, 256])
+        # hist_mode_h = int(mode(h_channel.flatten()).mode)
+        lower_bound = max(np.mean(avg_colors_list) - tol, 0)
+        upper_bound = min(np.mean(avg_colors_list) + tol, 255)
+        roi_around_centroid_color_h_mask = cv2.inRange(h_channel, lower_bound, upper_bound)
+        kernel = np.ones((10, 10), np.uint8)
+        roi_around_centroid_color_h_mask = cv2.dilate(roi_around_centroid_color_h_mask, kernel, iterations=1)
+        roi_around_centroid_color_h_mask = cv2.erode(roi_around_centroid_color_h_mask, kernel, iterations=1)
+        # close contour with big kernel
+        roi_around_centroid_color_h_mask = cv2.morphologyEx(roi_around_centroid_color_h_mask, cv2.MORPH_CLOSE,
+                                                          np.ones((10, 10), np.uint8))
+
+
+        # expand to non-small ROI
+        # small ROI to detect colors of mitosis
+        avg_colors_list = []
+        for region in [5, 10, 15]:
+            start_x, start_y, end_x, end_y = get_correct_coords(image, x, y, region_size=region)
+            roi_around_centroid = image[start_y:end_y, start_x:end_x]
+            # smooth image using dilate and erode methods
+            kernel = np.ones((5, 5), np.uint8)
+            roi_around_centroid = cv2.dilate(roi_around_centroid, kernel, iterations=1)
+            roi_around_centroid = cv2.erode(roi_around_centroid, kernel, iterations=1)
+            avg_colors_list.append(np.quantile(roi_around_centroid, 0.5, axis=(0, 1)))
+        start_x, start_y, end_x, end_y = get_correct_coords(image, x, y, region_size=50)
+        roi_around_centroid = image[start_y:end_y, start_x:end_x]
+        # smooth image using dilate and erode methods
+        kernel = np.ones((5, 5), np.uint8)
+        roi_around_centroid = cv2.dilate(roi_around_centroid, kernel, iterations=1)
+        roi_around_centroid = cv2.erode(roi_around_centroid, kernel, iterations=1)
+        # add tolerances to distribution of colors and check colors, must be between 0 and 255
+        tol = 15 # pixels
+        lower_bound = np.clip(np.array(avg_colors_list).mean(axis=0) - tol, 0, 255)
+        upper_bound = np.clip(np.array(avg_colors_list).mean(axis=0) + tol, 0, 255)
+        # create mask using color bounds
+        roi_around_centroid_color_mask = cv2.inRange(roi_around_centroid, lower_bound, upper_bound)
+        contours, _ = cv2.findContours(roi_around_centroid_color_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        x_roi, y_roi = transform_coordinates_to_roi(x, y, start_x, start_y)
+        if len(contours) > 1: # filter not desired contours
+            # coordinates x,y on ROI
+            x_roi, y_roi = transform_coordinates_to_roi(x, y, start_x, start_y)
+            # get nearest contour to (x_roi, y_roi) using centroids
+            nearest_idx = pd.Series([abs(np.array([x_roi, y_roi]) - \
+                                             c.mean(axis=(0, 1))).min() for c in contours]).idxmin()
+            nearest_contour = contours[nearest_idx]
+            # create new mask containing only the nearest contour
+            nearest_contour_mask = np.zeros_like(roi_around_centroid_color_mask)
+            roi_around_centroid_color_mask = cv2.drawContours(nearest_contour_mask,
+                                                              [nearest_contour], -1,
+                                                              (255, 255, 255), thickness=cv2.FILLED)
+
+        # close contour with big kernel
+        roi_around_centroid_color_mask = cv2.morphologyEx(roi_around_centroid_color_mask, cv2.MORPH_CLOSE,
+                                                          np.ones((10, 10), np.uint8))
+
+        non_zero_pixels = roi_around_centroid_color_mask != 0
+        # make circle mask
+        circle_mask = np.zeros_like(roi_around_centroid_color_mask)
+        circle_mask = cv2.circle(circle_mask, tuple((x_roi, y_roi)), 15, color=(255, 255, 255), thickness=-1)
+        # show roi and mask
+        show_image(roi_around_centroid, roi_around_centroid_color_mask, roi_around_centroid_color_h_mask, circle_mask)
+        # copy pixels of roi to mask image
+        mask_image[start_y:end_y, start_x:end_x][non_zero_pixels] = (255, 255, 255)
+
+    mask_image = cv2.cvtColor(mask_image, cv2.COLOR_BGR2GRAY)
+    return mask_image
+
+def get_correct_coords(image, x, y, region_size=15):
+    start_x = max(0, x - region_size)
+    end_x = min(image.shape[1], x + region_size)
+    start_y = max(0, y - region_size)
+    end_y = min(image.shape[0], y + region_size)
+    return start_x, start_y, end_x, end_y
+
+def transform_coordinates_to_roi(x, y, start_x, start_y):
+    x_roi = x - start_x
+    y_roi = y - start_y
+    return x_roi, y_roi
 
 def generate_patch(image, height, width, centered, patch_size=256):
     '''
