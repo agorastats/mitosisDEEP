@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 
 from createPatches.base import CreatePatches
-from utils.image import create_mask_with_annotations_circle
+from utils.image import create_mask_with_annotations_circle, create_shape_mask_inferring_from_centroid_annotations
 from utils.runnable import Main
 
 # AMIDA13 challenge. # These cases were collected from the Department of Pathology
@@ -23,6 +23,7 @@ class CreatePatchesAmida13(CreatePatches):
         self.data_path = DATA_PATH
         self.annot_path = ANNOT_PATH
         self.img_format = '.tif'
+        self.patchify = False
 
     def get_annotations(self, path):
         result = []
@@ -46,8 +47,7 @@ class CreatePatchesAmida13(CreatePatches):
         # create patches over annotations list
         for i, m in enumerate(annotations_list):
             w, h = m
-            centered_at = np.random.RandomState(self.seed_count).uniform(self.centered_limits[0],
-                                                                         self.centered_limits[1], 2)
+            centered_at = self.get_center_positions()
             image_patch = self.generate_patch(image, h, w, centered_at, patch_size=patch_size)
             mask_patch = self.generate_patch(mask, h, w, centered_at, patch_size=patch_size)
             assert sum(list(image_patch.shape)[:2]) == 2 * patch_size, \
@@ -75,7 +75,8 @@ class CreatePatchesAmida13(CreatePatches):
                         logging.info('___not annotations for img: %s' % str(img))
                         continue
                     annot_list = self.get_annotations(os.path.join(annot_dir, region, name_img + '.csv'))
-                    mask = create_mask_with_annotations_circle(image, annot_list)
+                    # mask = create_mask_with_annotations_circle(image, annot_list, radius=50)
+                    mask = create_shape_mask_inferring_from_centroid_annotations(image, annot_list)
                     assert len(np.unique(mask)) <= 2, 'more than 2 color pixels'
 
                     aux_name_img = 'region_' + region + '_' + name_img

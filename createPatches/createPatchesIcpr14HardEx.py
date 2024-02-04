@@ -14,7 +14,7 @@ FOLDERS_NAME = ['A03', 'A04', 'A05', 'A07', 'A10', 'A11', 'A12', 'A14', 'A15', '
 DATA_PATH = 'data/icpr14'  # path that contains inside it training folder images
 
 
-class CreatePatchesIcpr14(CreatePatches):
+class CreatePatchesIcpr14HardEx(CreatePatches):
 
     def __init__(self):
         super().__init__()
@@ -57,6 +57,7 @@ class CreatePatchesIcpr14(CreatePatches):
             self.write_patches(image_patch, mask_patch, name_img, i)
 
     def run(self, options):
+        logging.info('__Hard examples from Icpr14')
         for folder in self.folders_name:
             logging.info('Iterating folder:  %s' % str(folder))
             data_dir = os.path.join(self.data_path, folder, 'frames/x40/')
@@ -68,9 +69,10 @@ class CreatePatchesIcpr14(CreatePatches):
                 logging.info('___prepare patches for img: %s' % str(img))
                 name_img = img.split('.')[0]
                 image = cv2.imread(os.path.join(data_dir, img))
-                annot_list = self.get_annotations(os.path.join(annot_dir, name_img + '_mitosis.csv'))
-                # mask = create_mask_with_annotations_circle(image, annot_list, radius=50)
-                mask = create_shape_mask_inferring_from_centroid_annotations(image, annot_list)
+                annot_list = self.get_annotations(os.path.join(annot_dir, name_img + '_not_mitosis.csv'))
+                # empty mask for hard examples
+                mask = np.zeros_like(image)
+                mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
                 assert len(np.unique(mask)) <= 2, 'more than 2 color pixels'
 
                 self.create_patches_with_annotations(image, mask, annot_list, name_img,
@@ -78,8 +80,12 @@ class CreatePatchesIcpr14(CreatePatches):
 
                 self.create_patches_with_patchify(image, mask, name_img, patch_size=options['patch_size'])
 
+    def post_run(self, options):
+        self.data_path += 'hard_examples'
+        super().post_run(options)
+
 
 if __name__ == '__main__':
     Main(
-        CreatePatchesIcpr14()
+        CreatePatchesIcpr14HardEx()
     ).run()
