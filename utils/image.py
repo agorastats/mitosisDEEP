@@ -154,7 +154,7 @@ def create_shape_mask_inferring_from_centroid_annotations(image, annotations_lis
                                              c.mean(axis=(0, 1))).mean() for c in contours]).sort_values()
             cond = np.abs(nearestS.min() - nearestS[1:]) < 10
             if any(cond):
-                contours_idx_list = [nearestS.index[0]] + nearestS.index[1:][cond].tolist()[0]
+                contours_idx_list = [nearestS.index[0]] + nearestS.index[1:][cond].tolist()
             else:
                 contours_idx_list = [nearestS.index[0]]
             # create new mask containing only the nearest contour
