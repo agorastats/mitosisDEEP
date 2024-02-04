@@ -6,8 +6,8 @@ from utils.image import read_image
 from utils.loadAndSaveResults import read_data_frame
 from utils.runnable import Runnable, Main
 
-PATCH_DATA_PATH = 'patches/all_data'
-INFO_DF_NAME = 'infoDF.csv'
+PATCH_DATA_PATH = 'patches/all_data'  # to inplace with str data path folder
+INFO_DF_NAME = 'infoDF.csv' # assume info of patches located on this csv file
 
 
 class MitosisInPatchesCount(Runnable):
