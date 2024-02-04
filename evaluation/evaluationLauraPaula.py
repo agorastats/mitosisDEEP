@@ -1,5 +1,6 @@
 import sys
 
+from evaluation.base import EvaluationMasks
 from evaluation.evaluationUOC import EvaluationMasksUOC
 from utils.runnable import Main
 
@@ -7,7 +8,7 @@ DATA_PATH = 'data/LauraPaula'
 MASK_PATH = 'data/LauraPaula/masks'
 
 
-class EvaluationMasksLauraPaula(EvaluationMasksUOC):
+class EvaluationMasksLauraPaula(EvaluationMasks):
 
     def __init__(self):
         super().__init__()

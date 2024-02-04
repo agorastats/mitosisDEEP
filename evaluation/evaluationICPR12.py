@@ -16,7 +16,7 @@ DATA_PATH = 'data/icpr12/validation_data/icpr12_evaluation'
 MASK_PATH = 'data/icpr12/validation_data/icpr12_evaluation/masks_centroid' # eval with centroids and not shape masks
 
 
-class EvaluationICPR12(EvaluationMasksUOC):
+class EvaluationICPR12(EvaluationMasks):
 
     def __init__(self):
         super().__init__()
