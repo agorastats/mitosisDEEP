@@ -19,6 +19,7 @@ class CreatePatchesBreCaHad(CreatePatches):
 
     def __init__(self):
         super().__init__()
+        self.prefix_img = 'brecahad'
         self.folders_name = FOLDERS_NAME
         self.data_path = DATA_PATH
         self.annot_path = ANNOT_PATH

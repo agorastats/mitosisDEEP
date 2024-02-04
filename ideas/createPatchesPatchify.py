@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 from patchify import patchify
 import tifffile as tiff
 
-from utils.preprocess import Normalizer
+from utils.stain.preprocessStain import Normalizer
 from utils.image import create_dir
 
 if __name__ == '__main__':

@@ -9,10 +9,10 @@ from utils.runnable import Main, SequenceRunnable
 if __name__ == '__main__':
     Main(
         SequenceRunnable(
-            CreatePatchesAmida13(),
-            CreatePatchesIcpr12(),
+   CreatePatchesIcpr12(),
             CreatePatchesIcpr14(),
             CreatePatchesIcpr14HardEx(),
+            CreatePatchesAmida13(),
             CreatePatchesBreCaHad(),
             CreatePatchesMidog21()
         )

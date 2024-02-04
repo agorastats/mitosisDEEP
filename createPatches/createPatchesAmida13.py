@@ -19,6 +19,7 @@ class CreatePatchesAmida13(CreatePatches):
 
     def __init__(self):
         super().__init__()
+        self.prefix_img = 'amida13'
         self.folders_name = FOLDERS_NAME
         self.data_path = DATA_PATH
         self.annot_path = ANNOT_PATH

@@ -131,14 +131,15 @@ def create_shape_mask_inferring_from_centroid_annotations(image, annotations_lis
         start_x, start_y, end_x, end_y = get_correct_coords(image, x, y, region_size=50)
         roi_around_centroid = image[start_y:end_y, start_x:end_x]
         roi_around_centroid = cv2.cvtColor(roi_around_centroid, cv2.COLOR_BGR2HSV)
+        # merge channels back into HSV image with reducing noising
         roi_around_centroid = cv2.dilate(roi_around_centroid, kernel5, iterations=1)
         roi_around_centroid = cv2.erode(roi_around_centroid, kernel5, iterations=1)
-        tol = 15
-        h_channel = roi_around_centroid[:, :, 2]  # V channel
+        tol = 25
+        v_channel = roi_around_centroid[:, :, 2]  # V channel
         # make mask
         lower_bound = np.clip(np.mean(percentile_colors_list) - tol, 0, 255)
         upper_bound = np.clip(np.mean(percentile_colors_list) + tol, 0, 255)
-        roi_around_centroid_mask = cv2.inRange(h_channel, lower_bound, upper_bound)
+        roi_around_centroid_mask = cv2.inRange(v_channel, lower_bound, upper_bound)
         kernel10 = np.ones((10, 10), np.uint8)
         roi_around_centroid_mask = cv2.dilate(roi_around_centroid_mask, kernel10, iterations=1)
         roi_around_centroid_mask = cv2.erode(roi_around_centroid_mask, kernel10, iterations=1)
@@ -152,9 +153,16 @@ def create_shape_mask_inferring_from_centroid_annotations(image, annotations_lis
             # get nearest contour to (x_roi, y_roi) using centroids
             nearestS = pd.Series([abs(np.array([x_roi, y_roi]) - \
                                              c.mean(axis=(0, 1))).mean() for c in contours]).sort_values()
+            minIdx = nearestS.idxmin()
             cond = np.abs(nearestS.min() - nearestS[1:]) < 10
             if any(cond):
-                contours_idx_list = [nearestS.index[0]] + nearestS.index[1:][cond].tolist()
+                contours_idx_list = [nearestS.index[0]] # init cond
+                # & same shape check
+                contours_area = [cv2.contourArea(c) for c in contours]
+                otherIdx = [idx for idx in nearestS.index if idx != minIdx]
+                cond_shape = [np.abs(contours_area[minIdx] - contours_area[idx]) < 60 for idx in otherIdx]
+                if any(cond_shape):
+                    contours_idx_list = [nearestS.index[0]] + nearestS.index[1:][cond_shape].tolist()
             else:
                 contours_idx_list = [nearestS.index[0]]
             # create new mask containing only the nearest contour
@@ -163,6 +171,9 @@ def create_shape_mask_inferring_from_centroid_annotations(image, annotations_lis
             roi_around_centroid_mask = cv2.drawContours(nearest_contour_mask,
                                                         selected_contours, -1, # -1 to print all contours
                                                         color=(255, 255, 255),  thickness=cv2.FILLED)
+            roi_around_centroid_mask = cv2.dilate(roi_around_centroid_mask, kernel10, iterations=1)
+            roi_around_centroid_mask = cv2.erode(roi_around_centroid_mask, kernel10, iterations=1)
+            roi_around_centroid_mask = cv2.morphologyEx(roi_around_centroid_mask, cv2.MORPH_CLOSE, kernel10)
 
         non_zero_pixels = roi_around_centroid_mask != 0
         # copy pixels of roi to mask image

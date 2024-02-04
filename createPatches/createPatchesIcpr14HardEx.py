@@ -18,6 +18,7 @@ class CreatePatchesIcpr14HardEx(CreatePatches):
 
     def __init__(self):
         super().__init__()
+        self.prefix_img = 'icpr14HardEx'
         self.folders_name = FOLDERS_NAME
         self.data_path = DATA_PATH
         self.annot_path = self.data_path

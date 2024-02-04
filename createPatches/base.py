@@ -19,6 +19,7 @@ class CreatePatches(Runnable, metaclass=ABCMeta):
 
     def __init__(self):
         super().__init__()
+        self.prefix_img = None # prefix to all images indicating origin dataset
         self.data_path = None
         self.annot_path = None
         self.patches_dir = DEF_PATCHES_DIR
@@ -60,7 +61,7 @@ class CreatePatches(Runnable, metaclass=ABCMeta):
         return patch_image
 
     def write_patches(self, img_patch, mask_patch, name_img, number_patch):
-        name_img += '_' + str(number_patch) + '.jpg'
+        name_img = self.prefix_img + '_' + name_img + '_' + str(number_patch) + '.jpg'
         cv2.imwrite(os.path.join(self.img_output, name_img), img_patch)
         cv2.imwrite(os.path.join(self.mask_output, name_img), mask_patch)
         self.patches_list.append(name_img)
@@ -68,6 +69,7 @@ class CreatePatches(Runnable, metaclass=ABCMeta):
 
     def create_patches_with_patchify(self, image, mask, name_img, patch_size=256, n_patches=2):
         if self.patchify:
+            name_img = self.prefix_img + '_' + name_img  # add prefix of dataset to image
             # create random patches over all image (using patchify)  | step=path_size means no overlap of images
             all_patches_img = patchify(image, (patch_size, patch_size, 3), step=patch_size)
             all_patches_mask = patchify(mask, (patch_size, patch_size), step=patch_size)

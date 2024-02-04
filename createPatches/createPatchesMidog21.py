@@ -54,6 +54,7 @@ def get_midog_bbox_info_df(annotation_file="ideas/MIDOG.json", only_mitotic=True
 class CreatePatchesMidog21(CreatePatches):
     def __init__(self):
         super().__init__()
+        self.prefix_img = 'midog21'
         self.data_path = DATA_PATH
         self.annot_path = self.data_path
         self.annot_file = 'MIDOG.json'
