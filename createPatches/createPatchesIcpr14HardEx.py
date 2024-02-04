@@ -57,7 +57,7 @@ class CreatePatchesIcpr14HardEx(CreatePatches):
             self.write_patches(image_patch, mask_patch, name_img, i)
 
     def run(self, options):
-        logging.info('__Hard examples from Icpr14')
+        logging.info('__Hard examples from Icpr14, empty MASK case')
         for folder in self.folders_name:
             logging.info('Iterating folder:  %s' % str(folder))
             data_dir = os.path.join(self.data_path, folder, 'frames/x40/')
