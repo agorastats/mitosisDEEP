@@ -2,7 +2,6 @@ from createPatches.createPatchesAmida13 import CreatePatchesAmida13
 from createPatches.createPatchesBreCaHAD import CreatePatchesBreCaHad
 from createPatches.createPatchesIcpr12 import CreatePatchesIcpr12
 from createPatches.createPatchesIcpr14 import CreatePatchesIcpr14
-from createPatches.createPatchesIcpr14HardEx import CreatePatchesIcpr14HardEx
 from createPatches.createPatchesMidog21 import CreatePatchesMidog21
 from utils.runnable import Main, SequenceRunnable
 
@@ -11,7 +10,6 @@ if __name__ == '__main__':
         SequenceRunnable(
    CreatePatchesIcpr12(),
             CreatePatchesIcpr14(),
-            CreatePatchesIcpr14HardEx(),
             CreatePatchesAmida13(),
             CreatePatchesBreCaHad(),
             CreatePatchesMidog21()

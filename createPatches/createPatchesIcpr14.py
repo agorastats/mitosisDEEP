@@ -45,18 +45,12 @@ class CreatePatchesIcpr14(CreatePatches):
                 raise Warning("Line %d in %s has invalid value." % (ln, path))
         return result
 
-    def create_patches_with_annotations(self, image, mask, annotations_list, name_img, patch_size):
-        # to look patches use: show_image(image_patch), show_image(mask_patch)
-        # create patches over annotations list
+    def create_patches_with_annotations_from_not_mitosis(self, image, mask, annotations_list, name_img, patch_size):
         for i, m in enumerate(annotations_list):
-            centered_at = self.get_center_positions()
-            w, h = m
-            image_patch = self.generate_patch(image, h, w, centered_at, patch_size=patch_size)
-            mask_patch = self.generate_patch(mask, h, w, centered_at, patch_size=patch_size)
-            assert sum(list(image_patch.shape)[:2]) == 2 * patch_size, \
-                'Error in expected shape of patch. Check image %s' % str(name_img)
-            self.write_patches(image_patch, mask_patch, name_img, i)
-
+            image_patch, mask_patch = self.create_patch(image, m, mask, name_img, patch_size)
+            if not np.all(mask_patch == 0):
+                logging.info('patch contain marked mitosis!')
+            self.write_patches(image_patch, mask_patch, name_img + 'hard_ex', i)
     def run(self, options):
         for folder in self.folders_name:
             logging.info('Iterating folder:  %s' % str(folder))
@@ -76,8 +70,13 @@ class CreatePatchesIcpr14(CreatePatches):
 
                 self.create_patches_with_annotations(image, mask, annot_list, name_img,
                                                      patch_size=options['patch_size'])
-
                 self.create_patches_with_patchify(image, mask, name_img, patch_size=options['patch_size'])
+
+                logging.info('____treat hard labels')
+                annot_list = self.get_annotations(os.path.join(annot_dir, name_img + '_not_mitosis.csv'))
+                self.create_patches_with_annotations_from_not_mitosis(image, mask, annot_list, name_img,
+                                                                      patch_size=options['patch_size'])
+
 
 
 if __name__ == '__main__':

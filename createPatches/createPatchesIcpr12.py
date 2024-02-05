@@ -40,10 +40,10 @@ class CreatePatchesIcpr12(CreatePatches):
                 raise Warning("Line %d in %s has invalid value." % (ln, path))
         return result
 
-    def create_patches_with_annotations(self, image, mask, annotations_list, name_img, patch_size):
+    def create_patches_with_annotations(self, image, mask, annot_list, name_img, patch_size=None):
         # to look patches use: show_image(image_patch), show_image(mask_patch)
         # create patches over annotations list
-        for i, m in enumerate(annotations_list):
+        for i, m in enumerate(annot_list):
             # to avoid centered patches
             centered_at = self.get_center_positions()
             w, h = pd.DataFrame(m).mean(axis=0).round(0).astype(int)  # get centroid of mitosis
@@ -70,7 +70,6 @@ class CreatePatchesIcpr12(CreatePatches):
                 assert len(np.unique(mask)) <= 2, 'more than 2 color pixels'
 
                 self.create_patches_with_annotations(image, mask, annot_list, name_img, patch_size=options['patch_size'])
-
                 self.create_patches_with_patchify(image, mask, name_img, patch_size=options['patch_size'])
 
 

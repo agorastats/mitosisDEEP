@@ -71,18 +71,6 @@ class CreatePatchesMidog21(CreatePatches):
             raise Warning("name_img %s has invalid value in annot_df" % name_img)
         return result
 
-    def create_patches_with_annotations(self, image, mask, annotations_list, name_img, patch_size):
-        # to look patches use: show_image(image_patch), show_image(mask_patch)
-        # create patches over annotations list
-        for i, m in enumerate(annotations_list):
-            centered_at = self.get_center_positions()
-            w, h = m
-            image_patch = self.generate_patch(image, h, w, centered_at, patch_size=patch_size)
-            mask_patch = self.generate_patch(mask, h, w, centered_at, patch_size=patch_size)
-            assert sum(list(image_patch.shape)[:2]) == 2 * patch_size, \
-                'Error in expected shape of patch. Check image %s' % str(name_img)
-            self.write_patches(image_patch, mask_patch, name_img, i)
-
     def run(self, options):
         images_list = [f for f in os.listdir(self.data_path) if f.endswith(self.img_format)]
         annot_df = get_midog_bbox_info_df(os.path.join(self.annot_path, self.annot_file))
