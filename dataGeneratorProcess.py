@@ -37,8 +37,8 @@ class DataGenerator(Sequence):
             np.random.shuffle(self.indexes)
 
     def data_generation(self, indexes):
-        X = np.empty((self.batch_size, self.img_size, self.img_size, self.n_channels), dtype=np.float64)
-        y = np.empty((self.batch_size, self.img_size, self.img_size, 1), dtype=np.float64)
+        X = np.empty((self.batch_size, self.img_size, self.img_size, self.n_channels), dtype=np.float32)
+        y = np.empty((self.batch_size, self.img_size, self.img_size, 1), dtype=np.float32)
         for i, f in enumerate(self.df.loc[:, 'id'].iloc[indexes]):
             X[i, :, :, :] = read_image(os.path.join(self.img_path, f), size=self.img_size)
             if not self.to_predict:
