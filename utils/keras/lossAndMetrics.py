@@ -39,7 +39,7 @@ def focal_loss(y_true, y_pred, alpha=0.25, gamma=2):
     return focal_loss
 
 
-def jaccard_loss(y_true, y_pred, smooth=100):
+def _jaccard_loss(y_true, y_pred, smooth=100):
     """
     Jaccard = (|X & Y|)/ (|X|+ |Y| - |X & Y|)
             = sum(|A*B|)/(sum(|A|)+sum(|B|)-sum(|A*B|))
@@ -57,3 +57,33 @@ def jaccard_loss(y_true, y_pred, smooth=100):
     sum_ = K.sum(K.abs(y_true) + K.abs(y_pred), axis=-1)
     jac = (intersection + smooth) / (sum_ - intersection + smooth)
     return (1 - jac) * smooth
+
+
+# https://www.kaggle.com/code/bigironsphere/loss-function-library-keras-pytorch/notebook
+def focal_tversky_loss(targets, inputs, alpha=0.5, beta=3, gamma=1, smooth=1e-6):   # alpha=0.5=beta=0.5 is focal loss
+
+        #flatten label and prediction tensors
+        inputs = K.flatten(inputs)
+        targets = K.flatten(targets)
+
+        #True Positives, False Positives & False Negatives
+        TP = K.sum((inputs * targets))
+        FP = K.sum(((1-targets) * inputs))
+        FN = K.sum((targets * (1-inputs)))
+
+        Tversky = (TP + smooth) / (TP + alpha*FP + beta*FN + smooth)
+        FocalTversky = K.pow((1 - Tversky), gamma)
+
+        return FocalTversky
+
+
+def jaccard_loss(y_true, y_pred, smooth=5):
+    y_true_flat = K.flatten(y_true)
+    y_pred_flat = K.flatten(y_pred)
+
+    intersection = K.sum(K.abs(y_true_flat * y_pred_flat))
+    union = K.sum(K.abs(y_true_flat) + K.abs(y_pred_flat)) - intersection
+    jaccard = (intersection + smooth) / (union + smooth)
+    return (1 - jaccard) * smooth
+
+
