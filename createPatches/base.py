@@ -67,7 +67,7 @@ class CreatePatches(Runnable, metaclass=ABCMeta):
         self.patches_list.append(name_img)
         self.seed_count += 1
 
-    def create_patches_with_patchify(self, image, mask, name_img, patch_size=256, n_patches=2):
+    def create_patches_with_patchify(self, image, mask, name_img, patch_size=256, n_patches=1):
         if self.patchify:
             name_img = self.prefix_img + '_' + name_img  # add prefix of dataset to image
             # create random patches over all image (using patchify)  | step=path_size means no overlap of images

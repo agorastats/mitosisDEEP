@@ -59,7 +59,7 @@ class CreatePatchesMidog21(CreatePatches):
         self.annot_path = self.data_path
         self.annot_file = 'MIDOG.json'
         self.img_format = '.tiff'
-        self.patchify = False
+        self.patchify = True
 
     def get_annotations(self, annot_df, name_img):
         result = []

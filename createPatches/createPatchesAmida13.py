@@ -24,7 +24,7 @@ class CreatePatchesAmida13(CreatePatches):
         self.data_path = DATA_PATH
         self.annot_path = ANNOT_PATH
         self.img_format = '.tif'
-        self.patchify = False
+        self.patchify = True
 
     def get_annotations(self, path):
         result = []

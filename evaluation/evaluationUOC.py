@@ -20,9 +20,6 @@ class EvaluationMasksUOC(EvaluationMasks):
         self.mask_path = MASK_PATH
         self.suffix_annot = 'x'
 
-    def run(self, options):
-        infoDF = self.get_pred_info(options)
-        self.iterate_over_pred_images(infoDF, options)
 
 
 if __name__ == '__main__':

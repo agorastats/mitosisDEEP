@@ -9,7 +9,7 @@ from abc import ABCMeta
 from patchify import patchify
 
 from utils.image import create_dir, read_mask, rle_decode, trace_boundingBox
-from utils.loadAndSaveResults import read_data_frame
+from utils.loadAndSaveResults import read_data_frame, store_data_frame
 from utils.runnable import Runnable
 from keras import backend as K
 
@@ -103,13 +103,17 @@ class EvaluationMasks(Runnable, metaclass=ABCMeta):
         logging.info('iterating process: %s' % self.__class__.__name__)
 
     def run(self, options):
-        pass
+        infoDF = self.get_pred_info(options)
+        self.iterate_over_pred_images(infoDF, options)
 
+    def get_image_name(self, img):
+        image_name = img['id'].split('.')[0] + self.suffix_annot + '.' + img['id'].split('.')[1]
+        return image_name
     def iterate_over_pred_images(self, infoDF, options):
         dice_coef_df_list = [pd.DataFrame()]
         for i, img in infoDF.iterrows():
             logging.info('__evaluation image: %s' % str(img['id']))
-            image_name = img['id'].split('.')[0] + self.suffix_annot + '.' + img['id'].split('.')[1]
+            image_name = self.get_image_name(img)
             image = cv2.imread(os.path.join(self.data_path, image_name))
             mask = read_mask(os.path.join(self.mask_path, image_name))
             stain = False if img.get('stain') is None else img.get('stain')
@@ -122,6 +126,11 @@ class EvaluationMasks(Runnable, metaclass=ABCMeta):
             image = cv2.resize(image, (img['size_x'], img['size_y']))
             if len(img['rle']) > 0:
                 pred_mask = rle_decode(img['rle'], np.array((img['size_y'], img['size_x'])))
+                # smooth image using dilate and erode methods
+                kernel5 = np.ones((10, 10), np.uint8)  # to use in cv2 methods
+                pred_mask = cv2.dilate(pred_mask, kernel5, iterations=1)
+                pred_mask = cv2.erode(pred_mask, kernel5, iterations=1)
+                pred_mask = cv2.morphologyEx(pred_mask, cv2.MORPH_CLOSE, kernel5)
                 dice_coef_df.loc[:, 'pred_mitotic'] = len(get_centroids_of_mask(pred_mask))
                 dice_coef_df.loc[:, 'pred_mitotic_min_shape'] = len(get_centroids_of_mask(pred_mask, min_shape=15))
                 image = trace_boundingBox(image, pred_mask, color=(0, 0, 0), width=15)

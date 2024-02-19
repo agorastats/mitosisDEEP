@@ -23,7 +23,7 @@ class CreatePatchesIcpr14(CreatePatches):
         self.data_path = DATA_PATH
         self.annot_path = self.data_path
         self.img_format = '.tiff'
-        self.patchify = False
+        self.patchify = True
 
     def get_annotations(self, path):
         result = []
