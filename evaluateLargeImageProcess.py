@@ -17,7 +17,7 @@ DEFAULT_STAIN_REF_IMG = 'utils/stain/he_ref/A00_01_ref_img.bmp'
 
 class EvaluateLargeImageProcess(Runnable):
     def __init__(self, df=None, patchify_size=256, overlap_patches=1, img_path=None, mask_path=None,
-                 preprocess=None,
+                 preprocess=None, cutoff=0.5,
                  model=None, stain=False, stain_ref_img=None, output_info=None):
         super().__init__()
         assert img_path is not None, 'need to fill img_path!'
@@ -44,6 +44,8 @@ class EvaluateLargeImageProcess(Runnable):
         self.stain = [False] if stain is False else [False, True]
         if any(self.stain):
             self.init_stain_norm(DEFAULT_STAIN_REF_IMG if stain_ref_img is None else stain_ref_img)
+
+        self.cutoff = cutoff
 
     def init_stain_norm(self, img):
         img = read_image(img)
@@ -78,7 +80,7 @@ class EvaluateLargeImageProcess(Runnable):
             for j in range(patches.shape[1]):
                 single_patch = patches[i, j, :, :, :]
                 single_patch = np.expand_dims(single_patch, axis=0)  # (x,y,3) to (1,x,y,3)
-                single_patch_prediction = (self.model.predict(single_patch) > 0.5).astype(np.uint8)
+                single_patch_prediction = (self.model.predict(single_patch) > self.cutoff).astype(np.uint8)
                 predicted_patches.append(single_patch_prediction[0, :, :])
 
         predicted_patches_reshaped = np.reshape(predicted_patches,
