@@ -92,7 +92,7 @@ class EvaluateLargeImageProcess(Runnable):
                 new_redefined_patch = np.zeros_like(redefined_mask)
                 for contour in contours:
                     # Calcular la probabilidad promedio de los píxeles dentro del contorno
-                    average_probability = np.mean(single_patch_prediction[0, contour[:, 1], contour[:, 0]])
+                    average_probability = np.mean(redefined_mask[0, contour[:, 1], contour[:, 0]])
                     # Calcular el área del contorno
                     area = cv2.contourArea(contour)
                     # Filtrar contornos basados en probabilidad y otras métricas de forma
