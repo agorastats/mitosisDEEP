@@ -80,11 +80,11 @@ class EvaluateLargeImageProcess(Runnable):
             for j in range(patches.shape[1]):
                 single_patch = patches[i, j, :, :, :]
                 single_patch = np.expand_dims(single_patch, axis=0)  # (x,y,3) to (1,x,y,3)
-                single_patch_prediction = (self.model.predict(single_patch) >= self.cutoff).astype(np.uint8)
+                single_patch_prediction = (self.model.predict(single_patch) >= self.cutoff).astype(np.uint8) * 255.
                 # new approach applying treatment of initial prediction
                 # morphological transformation over patch
                 kernel5 = np.ones((5, 5), np.uint8)  # to use in cv2 methods
-                redefined_mask = cv2.dilate(single_patch_prediction*255., kernel5, iterations=1)
+                redefined_mask = cv2.dilate(single_patch_prediction, kernel5, iterations=1)
                 redefined_mask = cv2.erode(redefined_mask, kernel5, iterations=1)
                 redefined_mask = cv2.morphologyEx(redefined_mask, cv2.MORPH_CLOSE, kernel5)
                 # get contours
