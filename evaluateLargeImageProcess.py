@@ -97,8 +97,8 @@ class EvaluateLargeImageProcess(Runnable):
                     area = cv2.contourArea(contour)
                     # Filtrar contornos basados en probabilidad y otras métricas de forma
                     if average_probability >= 0.7 and area >= 10:
-                    # Rellenar el contorno en la imagen en blanco con un valor específico (por ejemplo, 1)
-                    cv2.drawContours(new_redefined_patch, [contour], -1, 1, thickness=cv2.FILLED)
+                        # Rellenar el contorno en la imagen en blanco con un valor específico (por ejemplo, 1)
+                        cv2.drawContours(new_redefined_patch, [contour], -1, 1, thickness=cv2.FILLED)
 
                 predicted_patches.append(new_redefined_patch[0, :, :].astype(np.uint8))
 
