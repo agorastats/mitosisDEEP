@@ -84,7 +84,7 @@ class EvaluateLargeImageProcess(Runnable):
                 # new approach applying treatment of initial prediction
                 # morphological transformation over patch
                 kernel5 = np.ones((5, 5), np.uint8)  # to use in cv2 methods
-                redefined_mask = cv2.dilate(single_patch_prediction, kernel5, iterations=1)
+                redefined_mask = cv2.dilate(single_patch_prediction*255., kernel5, iterations=1)
                 redefined_mask = cv2.erode(redefined_mask, kernel5, iterations=1)
                 redefined_mask = cv2.morphologyEx(redefined_mask, cv2.MORPH_CLOSE, kernel5)
                 # get contours
