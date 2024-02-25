@@ -81,7 +81,7 @@ class EvaluateLargeImageProcess(Runnable):
                 single_patch = patches[i, j, :, :, :]
                 single_patch = np.expand_dims(single_patch, axis=0)  # (x,y,3) to (1,x,y,3)
                 single_patch_prediction = (self.model.predict(single_patch) >= self.cutoff).astype(np.uint8) 
-                predicted_patches.append(single_patch_prediction[0])
+                predicted_patches.append(single_patch_prediction[0, :, :])
 
         predicted_patches_reshaped = np.reshape(predicted_patches,
                                                 [patches.shape[0], patches.shape[1], patches.shape[2],
