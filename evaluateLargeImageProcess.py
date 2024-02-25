@@ -81,26 +81,7 @@ class EvaluateLargeImageProcess(Runnable):
                 single_patch = patches[i, j, :, :, :]
                 single_patch = np.expand_dims(single_patch, axis=0)  # (x,y,3) to (1,x,y,3)
                 single_patch_prediction = (self.model.predict(single_patch) >= self.cutoff).astype(np.uint8) 
-                # new approach applying treatment of initial prediction
-                # morphological transformation over patch
-                kernel5 = np.ones((5, 5), np.uint8)  # to use in cv2 methods
-                redefined_mask = cv2.dilate(single_patch_prediction[0] * 255., kernel5, iterations=1)
-                redefined_mask = cv2.erode(redefined_mask, kernel5, iterations=1)
-                redefined_mask = cv2.morphologyEx(redefined_mask, cv2.MORPH_CLOSE, kernel5)
-                # get contours
-                contours, _ = cv2.findContours(redefined_mask[0, :, :], cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-                new_redefined_patch = np.zeros_like(redefined_mask)
-                for contour in contours:
-                    # Calcular la probabilidad promedio de los píxeles dentro del contorno
-                    average_probability = np.mean(redefined_mask[0, contour[:, 1], contour[:, 0]])
-                    # Calcular el área del contorno
-                    area = cv2.contourArea(contour)
-                    # Filtrar contornos basados en probabilidad y otras métricas de forma
-                    if average_probability >= 0.7 and area >= 10:
-                        # Rellenar el contorno en la imagen en blanco con un valor específico (por ejemplo, 1)
-                        cv2.drawContours(new_redefined_patch, [contour], -1, 1, thickness=cv2.FILLED)
-
-                predicted_patches.append(new_redefined_patch.astype(np.uint8))
+                predicted_patches.append(single_patch_prediction)
 
         predicted_patches_reshaped = np.reshape(predicted_patches,
                                                 [patches.shape[0], patches.shape[1], patches.shape[2],
