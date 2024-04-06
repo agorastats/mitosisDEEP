@@ -8,11 +8,15 @@ from keras.losses import binary_crossentropy
 
 # The smooth variable is used to help with backpropagation by not getting the term close to zero  \
 # as well as preventing overfitting with a relatively large value.
+
 def dice_coef(y_true, y_pred, smooth=1.):
     y_true_f = K.flatten(y_true)
     y_pred_f = K.flatten(y_pred)
     intersection = K.sum(y_true_f * y_pred_f)
     return (2. * intersection + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
+
+def binary_crossentropy_loss(y_true, y_pred):
+    return binary_crossentropy(y_true, y_pred)
 
 def dice_loss(y_true, y_pred):
     return 1 - dice_coef(y_true, y_pred)
@@ -60,4 +64,10 @@ def jaccard_loss(y_true, y_pred, smooth=5.):
     jaccard = (intersection + smooth) / (union + smooth)
     return (1 - jaccard) * smooth
 
+
+MAP_LOSS_FUNCTIONS = {'binary_crossentropy': binary_crossentropy_loss,
+                      'jaccard': jaccard_loss,
+                      'tversky': tversky_loss,
+                      'bce_dice': bce_dice_loss,
+                      'dice': dice_loss}
 

@@ -269,3 +269,16 @@ AUG_IMG_PIPELINE = Compose([
         OpticalDistortion(distort_limit=1, shift_limit=0.2)
     ], p=0.3)
 ], p=1)
+
+
+AUG_IMG_PIPELINE_V2 = Compose([
+    HorizontalFlip(p=1),
+    VerticalFlip(p=1),
+    GaussNoise(var_limit=0.02, p=0.3),
+    Blur(blur_limit=3, p=0.3),
+    OneOf([RandomContrast(limit=0.1), RandomBrightness(limit=0.1)], p=0.6),
+    OpticalDistortion(distort_limit=1, shift_limit=0.2)
+], p=1)
+
+
+MAP_AUG_IMG_PIPELINE = {'transform': AUG_IMG_PIPELINE, 'v2': AUG_IMG_PIPELINE_V2}
