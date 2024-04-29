@@ -34,12 +34,12 @@ if __name__ == '__main__':
         'experiment_name': 'experiment_1',
         'lr': 0.01,
         'batch_size': 32,
-        'epoch_number': 10,
+        'epoch_number': 1,
         'pretrained_model_path': 'unet-best', # unet-best or monuseg --> assume models on path ../pretrainedModels/{MODEL_NAME.h5}
         'loss': 'binary_crossentropy',  # look at utils/keras/lossAndMetrics.py for available loss functions (MAP_LOSS_FUNCTIONS)
         'augmentation': 'v2',  # augmentation for train set, look at utils/augmentation.py (MAP_AUG_IMG_PIPELINE) or False to avoid it
         'n_filters': 16,
-        'dropout': 0.3
+        'dropout': 0.8
 
     }
     # MORE PARAMETERS ...

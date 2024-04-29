@@ -14,3 +14,5 @@ matplotlib~=3.5.1
 bson==0.5.10
 google-cloud-storage>=1.42.0,<2.0.0
 google-cloud-firestore
+google-cloud-pubsub
+segmentation-models

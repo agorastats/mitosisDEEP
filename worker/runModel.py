@@ -12,7 +12,7 @@ from utils.keras.callbacks import get_callbacks_list_gc
 from utils.bucket import upload_object
 from google.cloud import storage
 from utils.keras.callbacks import get_callbacks_list_gc
-from runModel.params import PATH_OF_SECRET_JSON
+from worker.params import PATH_OF_SECRET_JSON
 from utils.augmentation import MAP_AUG_IMG_PIPELINE
 from utils.keras.builder import build_unet
 

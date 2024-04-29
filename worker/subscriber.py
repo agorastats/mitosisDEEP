@@ -7,8 +7,8 @@ from worker.runModel import train_mitosis_model
 PATH_OF_SECRET_JSON = '../secret.json'
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = PATH_OF_SECRET_JSON
 credentials_path = PATH_OF_SECRET_JSON
-project_id = 'train-mitosis-models' # name of project on Google Cloud
-subscription_name = 'training-sub' # subscription name on Google Cloud Pub/Sub
+project_id = 'train-mitosis-models'  # name of project on Google Cloud
+subscription_name = 'training-sub'  # subscription name on Google Cloud Pub/Sub
 
 subscriber = pubsub_v1.SubscriberClient.from_service_account_file(credentials_path)
 
